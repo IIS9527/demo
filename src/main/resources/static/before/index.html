@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>脚本web V1.0.0</title>
+  <!-- 引入样式 -->
+    <script src="js/cdn.jsdelivr.net_npm_vue@2.7.14_dist_vue.js"></script>
+   
+    <link rel="stylesheet" href="unpkg.com_element-ui@2.15.14_lib_theme-chalk_index.css">
+    <script src="js/unpkg.com_element-ui@2.15.14_lib_index.js"></script>
+    <script src="js/cdn.jsdelivr.net_npm_axios_dist_axios.min.js"></script>
+</head>
+<body>
+<div id="app" style="display: flex;flex-wrap: wrap ">
+
+   
+        <div style="max-width:400px">
+            直播间链接:<el-input v-model="roomAddress"  size="medium" placeholder="请输入内容"></el-input>
+            时长/分钟:<el-input v-model="time"  size="medium" placeholder="请输入内容"></el-input>
+            <!-- 截止时间：<div class="block">
+                <el-date-picker
+                  v-model="dateTime"
+                  type="datetime"
+                  placeholder="选择日期时间">
+                </el-date-picker>
+              </div> -->
+            任务数: <el-input-number v-model="number" :min="1" :max="6000" label="设备数量" style="margin-right:200px"></el-input-number>
+
+            <el-button id="setTask"  v-on:click="saveTask" >确定</el-button> 
+           
+        
+                 
+              </div>
+  
+<div>
+    <span>   当前任务列表：</span>
+    <el-table
+            :data="taskList"
+            sortable="true"
+            :default-sort="{ prop: 'timeForm', order: 'descending' }"
+            >
+        <el-table-column
+                prop="timeForm"
+                label="截止时间"
+                width="180"
+                >
+        </el-table-column>
+        <el-table-column
+                prop="videoName"
+                label="直播间名称"
+                width="180">
+        </el-table-column>
+        <el-table-column
+                prop="roomAddress"
+                label="地址"
+                width="180">
+        </el-table-column>
+        <el-table-column
+                prop="roomId"
+                label="直播间id"
+                width="180">
+        </el-table-column>
+        <el-table-column
+        prop="number"
+        label="剩余设备数"> 
+        </el-table-column>
+     
+        <el-table-column label="操作">
+          <template slot-scope="scope">
+          
+            <el-button
+              size="mini"
+              @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+          </template>
+        </el-table-column>
+    </el-table>
+</div>
+<div>
+    
+    <el-descriptions title="当前在线设备：" :column="3" border>
+        <!-- <el-descriptions-item label="账号名" label-class-name="my-label" content-class-name="my-content">kooriookami</el-descriptions-item>
+        <el-descriptions-item label="抖音号">18100000000</el-descriptions-item>
+        <el-descriptions-item label="设备名"></el-descriptions-item>
+        <el-descriptions-item label="备注">
+          <el-tag size="small"></el-tag>
+        </el-descriptions-item> -->
+       
+      </el-descriptions>
+</div>
+</div>
+</body>
+<script>
+
+function timestampToTime(timestamp) {
+    timestamp = timestamp ? timestamp : null;
+    let date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+    let Y = date.getFullYear() + '-';
+    let M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+    let D = (date.getDate() < 10 ? '0' + date.getDate() : date.getDate()) + ' ';
+    let h = (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + ':';
+    let m = (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()) + ':';
+    let s = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
+    return Y + M + D + h + m + s;
+  }
+
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                input: '',
+                dateTime:'',
+                openType:'',
+                number:'',
+                roomAddress:'',
+                time:'',
+                taskList: [],
+                taskList1:[]
+            }
+        },
+        created () {
+          this.getTaskList()
+        },
+        methods:{
+
+          saveTask:function(){
+                axios.post("/Task/setTask",{
+                    "dateTime":this.dateTime,
+                    "openType": this.openType,
+                    "number":   this.number,
+                    "roomAddress":  this.roomAddress,
+                    "time":     this.time*1000*60+new Date().getTime(),
+                    "duration":   this.time
+                })
+                    .then(response=> {
+                     if(response.data.code == 200){
+                      this.$message({
+                        type:'success',
+                        message:'设置成功'
+                      });
+                       console.log(1);
+                       this.getTaskList()
+                     }else{
+                      this.$message('设置失败');
+                                 console.log(2);
+                     }
+                      }).catch(err=>{
+                        this.$message('设置失败');
+                                 console.log(3);
+                      })
+          },
+          getTaskList:function(){
+
+            axios.get("/Task/getTaskList").then(res =>{
+              this.taskList1 =res.data.data
+           console.log(this.taskList1)
+              
+                for(i=0;i<this.taskList1.length;i++){
+                  let newDate = new Date();
+              
+                  this.taskList1[i].timeForm = timestampToTime( parseInt(this.taskList1[i].time));
+                  // Mon May 28 2018
+                  console.log(newDate.toDateString());
+                  console.log(newDate.toLocaleString());
+                  console.log(newDate.toLocaleTimeString());
+                                  }
+              this.taskList=this.taskList1
+              console.log(this.taskList)
+                
+            })
+              
+              
+              
+
+          },
+          handleDelete(index, row) {
+          
+            axios.post("/Task/deleteTask",row).then(res=>{
+                if(res.data.code == 200){
+                  this.$message({  type:'success', message:'删除成功'});
+                  this.getTaskList()
+                }
+            })
+            console.log(index, row);
+
+
+           },
+         
+                
+        }
+    })
+
+</script>
+<style scoped>
+     .my-label {
+    background: #E1F3D8;
+  }
+
+  .my-content {
+    background: #FDE2E2;
+  }
+  .el-table .warning-row {
+    background: oldlace;
+  }
+
+  .el-table .success-row {
+    background: #f0f9eb;
+  }
+</style>
+</html>

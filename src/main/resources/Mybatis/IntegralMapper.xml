@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.Mapper.IntegralMapper">
+
+
+<select id="selectExchangeIntegralList" parameterType="com.example.demo.Data.ExchangeIntegral">
+        select * from test.exchangeintegral
+        <trim prefix="where" prefixOverrides="and | or">
+               <if test="ei.exchangeTime!=null">
+                   and     exchangeTime = #{ei.exchangeTime}
+                </if>
+                <if test="ei.cardNo!=null">
+                   and     cardNo = #{ei.cardNo}
+                </if>
+                <if test="ei.allowTime!= null">
+                   and    allowTime = #{ei.allowTime}
+                </if>
+                <if test="ei.allowState!=null">
+                   and    allowState = #{ei.allowState}
+                </if>
+        </trim>
+         order by exchangeTime desc
+        <if test="ei.pageSize!=null and ei.size!=null ">
+            limit #{ei.pageSize},#{ei.size}
+        </if>
+
+
+</select>
+    <select id="selectExchangeIntegralListTotal" parameterType="com.example.demo.Data.ExchangeIntegral">
+        select count(0) from test.exchangeintegral
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="ei.exchangeTime!=null">
+                and     exchangeTime = #{ei.exchangeTime}
+            </if>
+            <if test="ei.cardNo!=null">
+                and     cardNo = #{ei.cardNo}
+            </if>
+            <if test="ei.allowTime!= null">
+                and    allowTime = #{ei.allowTime}
+            </if>
+            <if test="ei.allowState!=null">
+                and    allowState = #{ei.allowState}
+            </if>
+        </trim>
+
+    </select>
+
+    <select id="selectTodayExchangeAndAlreadExchangeIntegral"  >
+        SELECT
+            SUM(CASE WHEN allowState = 1 THEN integral ELSE 0 END) AS todayAlreadyExchangeIntegral,
+            SUM(CASE WHEN allowState = 0 THEN integral ELSE 0 END) AS todayExchangeIntegral
+        FROM exchangeintegral
+        WHERE DATE(exchangeTime) = CURDATE();
+    </select>
+
+
+
+
+
+
+
+
+
+</mapper>

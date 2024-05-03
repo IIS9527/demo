@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  <!-- 引入样式 -->
+    <script src="js/cdn.jsdelivr.net_npm_vue@2.7.14_dist_vue.js"></script>
+   
+    <link rel="stylesheet" href="unpkg.com_element-ui@2.15.14_lib_theme-chalk_index.css">
+    <script src="js/unpkg.com_element-ui@2.15.14_lib_index.js"></script>
+    <script src="js/cdn.jsdelivr.net_npm_axios_dist_axios.min.js"></script>
+</head>
+<body >
+
+	<div id="app">
+		<h1>首页</h1>
+		版本号:<el-input v-model="version"  size="medium" placeholder="输入如v1.0.0"></el-input>
+		版本提示:<el-input v-model="message"  size="medium" placeholder="输入版本提示信息"></el-input>
+		<>
+			<label class="label">
+				
+				<span class="before" :style="{width:pre+'%'}"></span>
+				
+			</label>
+			<input type="file" ref="file" @change="up()"  > 
+		</div>
+		
+	</div>
+
+</body>
+<script>
+
+new Vue({
+        el: '#app',
+		data(){
+			return {pics:[],
+				pre:0,
+				EC:{},
+				version:'',
+                message:''
+			
+			
+			}
+		},
+		created(){
+		},
+		methods:{
+			// 文件、图片上传
+
+			up(){
+				var that = this;
+				// 获取到this 赋值个that
+				var file = this.$refs.file.files[0];
+				
+			     if(!file){
+					return
+				
+				} // 如果没有文件就返回
+				// 拿到上传的文件
+				var  EC = new FormData();
+				// 创建一个表单数据
+				EC.append("file",file);
+				console.log("ASas",EC)
+				// 把图片或文件添加到data
+				if(this.message==''|| this.version == '' ){
+					this.$message('请输入版本信息');
+					return;
+				}
+				axios.post(
+				"/update/updateEC?version="+this.version+"&message="+this.message,
+				EC,
+				// 第1个参数 url 第二参数 data数据，第三个是配置渲染，
+				// onUploadProgress 当上传进度是
+				{onUploadProgress:e=>{
+					 
+					that.pre =Math.floor(e.loaded/e.total*100);
+					// e.loaded 已经上传的字节数据，e.total 字节数据  转换为1-100的比例值 赋值个pre	 
+                    
+				}}
+				)
+				.then(res=>{
+					
+					if(res.data.code==404){
+						// 如果错误为0
+						this.$message('错误');
+						// 把图片加入到图片pics数组
+					}
+					this.$message({
+                      type:'success',
+					  msg:"上传成功"
+					});
+					this.$refs.file.value="";
+					// 清空表单数据
+					this.pre = 0;
+					// 清空上传进度数据
+				})
+			},
+		
+		}
+    }
+)
+
+</script>
+<style scoped>
+    /* 设置宽高，颜色 文字内容信息  相对定位 */
+	.label .before{
+		position: absolute;
+		left:0;
+		bottom:0;
+		content: "";
+		display: inline-block;
+		height: 2px;
+		width: 0%;
+		background-color: orange;
+	}
+	/* 绝对定定位  宽度默认0%  底部橙色的进度条*/
+	.label input{ display: none;}
+	/* 被lable包裹的input 单击input 和单击 label效果一致 ，把input隐藏 */
+
+</style>

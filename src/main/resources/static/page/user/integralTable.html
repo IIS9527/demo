@@ -1,0 +1,201 @@
+<div class="layuimini-container layuimini-page-anim">
+    <div class="layuimini-main">
+
+        <blockquote class="layui-elem-quote layui-text">
+        <div  id="myAvailableIntegral">  当前可用积分：0 </div>
+        </blockquote>
+        <div >
+           兑换积分 <input type="text" name="integral"  autocomplete="off"  class="layui-input">
+        </div>
+        <button data-method="confirmTrans" id="confirmApplicationButton" class="layui-btn" lay-on="test-confirm">确认申请</button>
+
+        <script type="text/html" id="toolbarDemo">
+            <div>兑换历史</div>
+        </script>
+
+        <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+
+        <script type="text/html" id="currentTableBar">
+            <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit">编辑</a>
+            <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete" lay-event="delete">删除</a>
+        </script>
+
+    </div>
+</div>
+
+<script>
+    layui.use(['form', 'table','miniPage','element'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table,
+            miniPage = layui.miniPage;
+
+
+        $.ajax({
+            url:"/user/myInfo",
+
+            type:"get",
+            dataType:"json",
+            headers : {'Content-Type' : 'application/json;charset=utf-8'}, //接口json格式
+            success:function(data){
+                console.log(data);
+                if (data.code == 200) {
+                    $("#myAvailableIntegral").html("可用积分为："+data.data.availableIntegral)
+                }
+                else {
+                    layer.msg(data.data, {icon: 1});
+                }
+            },
+            error:function(data){
+                layer.msg('提交申请失败', {icon: 1});
+            }
+        });
+
+
+
+
+
+
+          $('#confirmApplicationButton').on('click', function () {
+             let inputValue = $("input[name='integral']").val();
+              //配置一个透明的询问框
+              layer.confirm('确认申请积分？', {icon: 3}, function(){
+                  $.ajax({
+                      url:"/user/applyExchange",
+                      data:JSON.stringify({"integral":inputValue}),
+                      type:"post",
+                      dataType:"json",
+                      headers : {'Content-Type' : 'application/json;charset=utf-8'}, //接口json格式
+                      success:function(data){
+                          console.log(data);
+                          if (data.code == 200) {
+                              layer.msg('提交申请成功', {icon: 1});
+                          }
+                          else {
+                              layer.msg(data.msg, {icon: 0});
+                          }
+                      },
+                      error:function(data){
+                          layer.msg('提交申请失败', {icon: 1});
+                      }
+                  });
+              }, function(){
+                  layer.msg('取消成功');
+              });
+        });
+
+        table.render({
+            elem: '#currentTableId',
+            url: '/user/MyApplyExchangeIntegral',
+            toolbar: '#toolbarDemo',
+            response: {
+                statusCode: 200 // 重新规定成功的状态码为 200，table 组件默认为 0
+            },
+            defaultToolbar: ['filter', 'exports', 'print', {
+                title: '提示',
+                layEvent: 'LAYTABLE_TIPS',
+                icon: 'layui-icon-tips'
+            }],
+            cols: [[
+                {type: "checkbox", width: 50},
+                {field: 'exchangeTime', title: '兑换时间', sort: true},
+                {field: 'integral',  title: '兑换积分', sort: true},
+                {field: 'allowState',  title: '兑换状态', templet: function(d){
+                        if (d.allowState===1) {
+                          return "成功"
+                        }
+                        else{
+                            return "申请中"
+                        }
+                    }},
+            ]],
+            limits: [10, 15, 20, 25, 50, 100],
+            limit: 15,
+            page: true,
+            skin: 'line'
+        });
+
+        // 监听搜索操作
+        form.on('submit(data-search-btn)', function (data) {
+            var result = JSON.stringify(data.field);
+            layer.alert(result, {
+                title: '最终的搜索信息'
+            });
+
+            //执行搜索重载
+            table.reload('currentTableId', {
+                page: {
+                    curr: 1
+                }
+                , where: {
+                    searchParams: result
+                }
+            }, 'data');
+
+            return false;
+        });
+
+        /**
+         * toolbar事件监听
+         */
+        table.on('toolbar(currentTableFilter)', function (obj) {
+            if (obj.event === 'add') {   // 监听添加操作
+                var content = miniPage.getHrefContent('page/table/add.html');
+                var openWH = miniPage.getOpenWidthHeight();
+
+                var index = layer.open({
+                    title: '添加用户',
+                    type: 1,
+                    shade: 0.2,
+                    maxmin:true,
+                    shadeClose: true,
+                    area: [openWH[0] + 'px', openWH[1] + 'px'],
+                    offset: [openWH[2] + 'px', openWH[3] + 'px'],
+                    content: content,
+                });
+                $(window).on("resize", function () {
+                    layer.full(index);
+                });
+            } else if (obj.event === 'delete') {  // 监听删除操作
+                var checkStatus = table.checkStatus('currentTableId')
+                    , data = checkStatus.data;
+                layer.alert(JSON.stringify(data));
+            }
+        });
+
+        //监听表格复选框选择
+        table.on('checkbox(currentTableFilter)', function (obj) {
+            console.log(obj)
+        });
+
+        table.on('tool(currentTableFilter)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'edit') {
+
+                var content = miniPage.getHrefContent('page/table/add.html');
+                var openWH = miniPage.getOpenWidthHeight();
+
+                var index = layer.open({
+                    title: '编辑用户',
+                    type: 1,
+                    shade: 0.2,
+                    maxmin:true,
+                    shadeClose: true,
+                    area: [openWH[0] + 'px', openWH[1] + 'px'],
+                    offset: [openWH[2] + 'px', openWH[3] + 'px'],
+                    content: content,
+                });
+                $(window).on("resize", function () {
+                    layer.full(index);
+                });
+                return false;
+            } else if (obj.event === 'delete') {
+                layer.confirm('真的删除行么', function (index) {
+                    obj.del();
+                    layer.close(index);
+                });
+            }
+        });
+
+    });
+</script>

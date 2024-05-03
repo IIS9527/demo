@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.Mapper.UserMapper">
+
+
+    <update id="setMyInfo" parameterType="com.example.demo.Data.User" >
+        update  user
+        set
+        <trim suffixOverrides=",">
+            <if test="user.password!=null">
+                password = #{user.password},
+            </if>
+            <if test="user.qrUrl!=null">
+                qrUrl = #{user.qrUrl},
+            </if>
+            <if test="user.realName!=null">
+                realName = #{user.realName},
+            </if>
+        </trim>
+        where cardNo = #{user.cardNo}
+    </update>
+
+   <insert id="addUser"  parameterType="com.example.demo.Data.User">
+
+     insert into user (cardNo, password, realName,phone, totalIntegral, freezeIntegral,  tempIntegral, redeemedIntegral, availableIntegral, createdTime)
+     values (#{user.cardNo}, #{user.password}, #{user.realName},#{user.phone},0, 0, 0, 0, 0,now());
+
+
+   </insert>
+   <update id="updataTempIntegralEveryday">
+       update user
+       set  availableIntegral =   tempIntegral+availableIntegral,tempIntegral = 0;
+   </update>
+
+
+
+
+
+
+</mapper>

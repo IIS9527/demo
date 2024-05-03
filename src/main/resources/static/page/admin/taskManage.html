@@ -1,0 +1,583 @@
+<div class="layuimini-container layuimini-page-anim">
+    <div class="layuimini-main">
+
+        <fieldset class="table-search-fieldset">
+            <legend>发布任务</legend>
+            <div style="margin: 10px 10px 10px 10px">
+                <form class="layui-form layui-form-pane" action="">
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label">直播链接</label>
+                            <div class="layui-input-inline">
+                                <input type="text"   name="roomAddress" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">RoomId</label>
+                            <div class="layui-input-inline">
+                                <input type="text"   name="roomId" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+
+                            <label class="layui-form-label">直播名称</label>
+                            <div class="layui-input-inline">
+                                <input type="text"   name="videoName" autocomplete="off" class="layui-input">
+                            </div>
+
+                        </div>
+                        <div class="layui-inline">
+
+                            <label class="layui-form-label">西瓜app搜索名称</label>
+                            <div class="layui-input-inline">
+                                <input type="text"   name="videoNameXiGua" autocomplete="off" class="layui-input">
+                            </div>
+
+                        </div>
+                        <div class="layui-inline">
+
+                            <label class="layui-form-label">头条app作品进入</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="videoNameTouTiao" autocomplete="off" class="layui-input">
+                            </div>
+
+                        </div>
+<!--                        <div class="layui-inline">-->
+<!--                            <label class="layui-form-label">任务时长</label>-->
+<!--                            <div class="layui-input-inline">-->
+<!--                                <input type="text" lay-verify="required|number" name="duration" autocomplete="off" class="layui-input">-->
+<!--                            </div>-->
+<!--                        </div>-->
+                        <div class="layui-inline">
+                            <label class="layui-form-label">任务数量</label>
+                            <div class="layui-input-inline">
+                                <input type="text" lay-verify="required|number" name="number" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">任务积分/分</label>
+                            <div class="layui-input-inline">
+                                <input type="text" lay-verify="required|number " name="integral" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">发起时间从</label>
+                            <div class="layui-input-block">
+                                <input name="beginTimeFrom" lay-verify="required" type="text" autocomplete="off" id="startTime" class="layui-input laydate">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">发起时间至</label>
+                            <div class="layui-input-block">
+                                <input name="beginTimeTo" lay-verify="required" type="text" autocomplete="off" id="endTime" class="layui-input laydate">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <button type="submit" class="layui-btn layui-btn-primary"  lay-submit lay-filter="data-search-btn">发布任务</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </fieldset>
+
+
+        <script type="text/html" id="toolbarDemo">
+            <div class="layui-btn-container">
+                <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="history">历史 </button>
+                <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete1"> 删除 </button>
+            </div>
+        </script>
+
+        <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter" ></table>
+
+<!--        <table class="layui-hide" id="newTaskTable" lay-filter="currentTableFilter" ></table>-->
+
+        <script type="text/html" id="currentTableBar">
+            <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-on="test-iframe-handle" lay-event="check">查看</a>
+            <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-on="test-iframe-handle" lay-event="edit">设置</a>
+            <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete" lay-event="delete">删除</a>
+        </script>
+    </div>
+
+</div>
+
+<script>
+    layui.use(['form', 'table','miniPage','element','util','laydate'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table,
+            miniPage = layui.miniPage;
+            laydate = layui.laydate;
+            flow = layui.flow
+        var ss = 0
+
+        table.render({
+            elem: '#currentTableId',
+            url: '/Task/getTaskList',
+            toolbar: '#toolbarDemo',
+            response: {
+                statusCode: 200 // 重新规定成功的状态码为 200，table 组件默认为 0
+            },
+            parseData:function(res){
+                console.log(res)
+                return {
+                    "code": res.code, // 解析接口状态
+                    "count": res.msg, // 解析数据长度
+                    "data": res.data // 解析数据列表
+                }
+            },
+            request: {
+                pageName: 'page', // 页码的参数名称，默认：page
+                limitName: 'size' // 每页数据条数的参数名，默认：limit
+            },
+            defaultToolbar: ['filter', 'exports', 'print', {
+                title: '提示',
+                layEvent: 'LAYTABLE_TIPS',
+                icon: 'layui-icon-tips'
+            }],
+            cols: [[
+                {type: "checkbox", width: 50},
+                {field: 'roomId', title: '直播id', sort: true},
+                {field: 'videoName', title: '名称', sort: true},
+                {field: 'duration', title: '时长',width: 80},
+                {field: 'integral', title: '积分/分', sort: true},
+                {field: 'beginTimeFrom', title: '开始时间'},
+                {field: 'beginTimeTo', title: '截止时间'},
+                {field: 'realDieTime', title: '实际结束时间', sort: true},
+                {field: 'creatIntegral', title: '生成积分', sort: true},
+                {field: 'number',width: 180, title: '数量总/剩余/任务中', sort: true, templet: function(d){
+                        return d.numberStatic+"/"+d.number+"/"+ d.numberWorking }},
+                {title: '操作', minWidth: 180, toolbar: '#currentTableBar', align: "center"}
+            ]],
+            limits: [10, 15, 20, 25, 50, 100],
+            limit: 25,
+            page: true,
+            skin: 'line'
+        });
+
+        // page=1&limit=20&sort=add_time&order=desc&start=&end=
+        // table.render({
+        //     elem: '#newTaskTable',
+        //     url: 'http://127.0.0.1:9527/outback/list',
+        //     toolbar: '#toolbarDemo',
+        //     response: {
+        //         statusCode: 200 // 重新规定成功的状态码为 200，table 组件默认为 0
+        //     },
+        //     headers:{
+        //         "Access-Control-Allow-Origin": "localhost:8999"
+        //     },
+        //     parseData:function(res){
+        //         console.log(res)
+        //         return {
+        //             "code": res.code, // 解析接口状态
+        //             "count": res.msg, // 解析数据长度
+        //             "data": res.data // 解析数据列表
+        //         }
+        //     },
+        //     where:{
+        //
+        //         sort: 'add_time',
+        //         order:'desc',
+        //         start:'',
+        //         end:'',
+        //
+        //     },
+        //     request: {
+        //         pageName: 'page', // 页码的参数名称，默认：page
+        //         limitName: 'limit', // 每页数据条数的参数名，默认：limit
+        //     },
+        //     defaultToolbar: ['filter', 'exports', 'print', {
+        //         title: '提示',
+        //         layEvent: 'LAYTABLE_TIPS',
+        //         icon: 'layui-icon-tips'
+        //     }],
+        //     cols: [[
+        //         {type: "checkbox", width: 50},
+        //         {field: 'roomId', title: '直播id', sort: true},
+        //         {field: 'videoName', title: '名称', sort: true},
+        //         {field: 'duration', title: '时长',width: 80},
+        //         {field: 'integral', title: '积分/分', sort: true},
+        //         {field: 'beginTimeFrom', title: '开始时间'},
+        //         {field: 'beginTimeTo', title: '截止时间'},
+        //         {field: 'realDieTime', title: '实际结束时间', sort: true},
+        //         {field: 'creatIntegral', title: '生成积分', sort: true},
+        //         {field: 'number',width: 180, title: '数量总/剩余/任务中', sort: true, templet: function(d){
+        //                 return d.numberStatic+"/"+d.number+"/"+ d.numberWorking }},
+        //         {title: '操作', minWidth: 180, toolbar: '#currentTableBar', align: "center"}
+        //     ]],
+        //     limits: [10, 15, 20, 25, 50, 100],
+        //     limit: 25,
+        //     page: true,
+        //     skin: 'line'
+        // });
+        //日期
+        var nowTime=new Date();
+        var startTime=laydate.render({
+            elem:'#startTime',
+            type:'datetime',
+            btns: ['confirm'],
+            min:'nowTime',//默认最大值为当前日期
+            value: new Date(),
+            done:function(value,date){
+//    		console.log(value); //得到日期生成的值，如：2017-08-18
+//    	    console.log(date); //得到日期时间对象：{year: 2017, month: 8, date: 18, hours: 0, minutes: 0, seconds: 0}
+
+                endTime.config.min={
+                    year:date.year,
+                    month:date.month-1,//关键
+                    date:date.date,
+                    hours:date.hours,
+                    minutes:date.minutes,
+                    seconds:date.seconds
+                };
+            }
+        })
+
+        var endTime=laydate.render({
+            elem:'#endTime',
+            type:'datetime',
+            btns: ['confirm'],
+            min:'nowTime',
+            value: new Date(),
+            done:function(value,date){
+//    		console.log(value); //得到日期生成的值，如：2017-08-18
+//    	    console.log(date); //得到日期时间对象：{year: 2017, month: 8, date: 18, hours: 0, minutes: 0, seconds: 0}
+                startTime.config.max={
+                    year:date.year,
+                    month:date.month-1,//关键
+                    date:date.date,
+                    hours:date.hours,
+                    minutes:date.minutes,
+                    seconds:date.seconds
+                }
+            }
+        })
+
+        // 监听搜索操作
+        form.on('submit(data-search-btn)', function (data) {
+           let result = JSON.stringify(data.field);
+            layer.confirm('确认发布？', {icon: 3}, function(){
+                    var loadIndex = layer.load(0);
+            $.ajax({
+                url:"/Task/setTask",
+                data:result,
+                type:"post",
+                dataType:"json",
+                headers : {'Content-Type' : 'application/json;charset=utf-8'}, //接口json格式
+                success:function(data){
+                    console.log(data);
+                    if (data.code == 200) {
+                        layer.close(loadIndex)
+                        layer.msg("发布成功", {icon: 1});
+                        //执行搜索重载
+                        table.reload('currentTableId', {
+                            page: {
+                                curr: 1
+                            }
+                            , where: {
+                                searchParams: result
+                            }
+                        }, 'data');
+                    }
+                    else {
+                        layer.msg(data.msg, {icon: 2});
+                        layer.close(loadIndex)
+                    }
+                    layui.close(loadIndex)
+                },
+                error:function(data){
+                    layer.msg('发布失败', {icon: 2});
+                }
+            })},
+                function(){
+                    layer.msg('取消成功');
+                });
+     return false;
+        });
+
+        /**
+         * toolbar事件监听
+         */
+        table.on('toolbar(currentTableFilter)', function (obj) {
+            if (obj.event === 'history') {   // 监听添加操作
+                ss =1
+                table.reload('currentTableId', {
+                    url:"/Task/getHistoryTaskList",
+                    page: {
+                        curr: 1
+                    }
+                    , where: {
+                      state: 0
+                    }
+                }, 'data');
+
+            }
+            else if (obj.event === 'delete1') {  // 监听删除操作
+                var checkStatus = table.checkStatus('currentTableId')
+                let data = checkStatus.data;
+                console.log(data)
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+                $.ajax({
+                    url:"/Task/deleteHistoryTask",
+                    data:JSON.stringify(data),
+                    type:"post",
+                    dataType:"json",
+                    headers : {'Content-Type' : 'application/json;charset=utf-8'}, //接口json格式
+                    success:function(data){
+                        console.log(data);
+                        if (data.code === 200) {
+                            layer.msg("删除成功", {icon: 1});
+                            //执行搜索重载
+                            table.reload('currentTableId', {
+                                url:"/Task/getHistoryTaskList",
+                                page: {
+                                    curr: 1
+                                }
+                                , where: {
+
+                                }
+                            }, 'data');
+                        }
+                        else {
+                            layer.msg(data.data, {icon: 2});
+                        }
+                    },
+                    error:function(data){
+                        layer.msg('删除失败', {icon: 2});
+                    }
+                })
+                ////////////////////////////////////////////////////////////
+
+
+
+
+
+
+            }
+        });
+
+        //监听表格复选框选择
+        // table.on('checkbox(currentTableFilter)', function (obj) {
+        //     console.log(obj)
+        // });
+
+        table.on('tool(currentTableFilter)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'check') {
+                sessionStorage.setItem("adminId",data.id)
+                var content = miniPage.getHrefContent('./deviceListTable1.html?id='+data.id);
+                var openWH = miniPage.getOpenWidthHeight();
+
+                var index = layer.open({
+                    title: '设备列表',
+                    type: 1,
+                    shade: 0.2,
+                    maxmin:true,
+                    shadeClose: true,
+                    area: [openWH[0] + 'px', openWH[1] + 'px'],
+                    offset: [openWH[2] + 'px', openWH[3] + 'px'],
+                    content: content,
+                });
+                $(window).on("resize", function () {
+                    layer.full(index);
+                });
+
+
+
+            } else if (obj.event === 'edit')
+            {
+                let data1 = obj.data;
+                layer.open({
+                    type: 1,
+                    area: '350px',
+                    resize: false,
+                    shadeClose: true,
+                    title: '修改任务',
+                    content: `
+          <div class="layui-form" lay-filter="filter-test-layer" style="margin: 16px;">
+            <div class="demo-login-container">
+              <div class="layui-form-item">
+                <div class="layui-input-wrap">
+                  <input type="text" name="addNumber"  lay-verify="number" value="0" placeholder="增加或减少人数" lay-reqtext="请填写人数" autocomplete="off" class="layui-input" lay-affix="clear">
+                  <input name="beginTimeTo"  type="text" autocomplete="off" id="endTime1"  class="layui-input laydate">
+                </div>
+              </div>
+              <div class="layui-form-item">
+                <button class="layui-btn layui-btn-fluid" lay-submit lay-filter="demo-login">确定</button>
+              </div>
+              <div class="layui-form-item demo-login-other">
+              </div>
+            </div>
+          </div>
+        `,
+                    success: function(){
+
+                        let endTime1= laydate.render({
+                            elem:'#endTime1',
+                            type:'datetime',
+                            btns: ['confirm'],
+                            min:'nowTime',
+                            done:function(value,date){
+//    		console.log(value); //得到日期生成的值，如：2017-08-18
+//    	    console.log(date); //得到日期时间对象：{year: 2017, month: 8, date: 18, hours: 0, minutes: 0, seconds: 0}
+                                startTime.config.max={
+                                    year:date.year,
+                                    month:date.month-1,//关键
+                                    date:date.date,
+                                    hours:date.hours,
+                                    minutes:date.minutes,
+                                    seconds:date.seconds
+                                }
+                            }
+                        })
+
+                        // 对弹层中的表单进行初始化渲染
+                        form.render();
+                        // 表单提交事件
+                        form.on('submit(demo-login)', function(data){
+                            var field = data.field; // 获取表单字段值
+                            let d = {"id":data1.id,"number":field.addNumber,"beginTimeTo":field.beginTimeTo}
+                            // 此处可执行 Ajax 等操作
+                            $.ajax({
+                                url:"/admin/setTaskNumber",
+                                data:JSON.stringify(d),
+                                type:"post",
+                                dataType:"json",
+                                headers : {'Content-Type' : 'application/json;charset=utf-8'}, //接口json格式
+                                success:function(data){
+                                    console.log(data);
+                                    if (data.code == 200) {
+                                        layer.close(index);
+                                        layer.msg("设置成功", {icon: 1});
+                                        //执行搜索重载
+                                        table.reload('currentTableId', {
+                                            page: {
+                                                curr: 1
+                                            },
+                                            where:{
+                                                state:1
+                                            },
+                                        }, 'data');
+                                    }
+                                    else {
+                                        layer.msg(data.data, {icon: 2});
+                                    }
+                                },
+                                error:function(data){
+                                    layer.msg('删除失败', {icon: 2});
+                                }
+                            })
+                            return false; // 阻止默认 form 跳转
+                        });
+                    }
+                });
+            }
+
+
+
+            else if (obj.event === 'delete') {
+
+                layer.confirm('真的删除行么', function (index) {
+                    if (ss === 0) {
+                        $.ajax({
+                            url:"/Task/deleteTask",
+                            data:JSON.stringify(data),
+                            type:"post",
+                            dataType:"json",
+                            headers : {'Content-Type' : 'application/json;charset=utf-8'}, //接口json格式
+                            success:function(data){
+                                console.log(data);
+                                if (data.code == 200) {
+                                    layer.close(index);
+                                    layer.msg("删除成功", {icon: 1});
+                                    //执行搜索重载
+                                    table.reload('currentTableId', {
+                                        page: {
+                                            curr: 1
+                                        }
+                                        , where: {
+
+                                        }
+                                    }, 'data');
+                                }
+                                else {
+                                    layer.msg(data.data, {icon: 2});
+                                }
+                            },
+                            error:function(data){
+                                layer.msg('删除失败', {icon: 2});
+                            }
+                        })
+                    }else {
+
+                        $.ajax({
+                            url:"/Task/deleteHistoryTask",
+                            data:JSON.stringify(data),
+                            type:"post",
+                            dataType:"json",
+                            headers : {'Content-Type' : 'application/json;charset=utf-8'}, //接口json格式
+                            success:function(data){
+                                console.log(data);
+                                if (data.code == 200) {
+                                    layer.close(index);
+                                    layer.msg("删除成功", {icon: 1});
+                                    //执行搜索重载
+                                    table.reload('currentTableId', {
+                                        url:"/Task/getHistoryTaskList",
+                                        page: {
+                                            curr: 1
+                                        }
+                                        , where: {
+
+                                        }
+                                    }, 'data');
+                                }
+                                else {
+                                    layer.msg(data.data, {icon: 2});
+                                }
+                            },
+                            error:function(data){
+                                layer.msg('删除失败', {icon: 2});
+                            }
+                        })
+
+                    }
+
+
+                });
+            }
+            return false;
+        });
+
+    });
+    function timestampToTime(timestamp) {
+        timestamp = timestamp ? timestamp : null;
+        let date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+        let Y = date.getFullYear() + '-';
+        let M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+        let D = (date.getDate() < 10 ? '0' + date.getDate() : date.getDate()) + ' ';
+        let h = (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + ':';
+        let m = (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()) + ':';
+        let s = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
+        return Y + M + D + h + m + s;
+    }
+    /**获取近N天*/
+    function getRecentDay(day){
+        var today = new Date();
+        var targetday_milliseconds=today.getTime() + 1000*60*60*24*day;
+        today.setTime(targetday_milliseconds);
+        var tYear = today.getFullYear();
+        var tMonth = today.getMonth();
+        var tDate = today.getDate();
+        tMonth = doHandleMonth(tMonth + 1);
+        tDate = doHandleMonth(tDate);
+        return tYear+"-"+tMonth+"-"+tDate;
+    }
+    function doHandleMonth(month){
+        var m = month;
+        if(month.toString().length == 1){
+            m = "0" + month;
+        }
+        return m;
+    }
+</script>

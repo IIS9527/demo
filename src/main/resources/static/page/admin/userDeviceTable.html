@@ -1,0 +1,65 @@
+<div class="layuimini-main">
+
+  <table class="layui-hide" id="currentTableId1" lay-filter="currentTableFilter1"></table>
+
+
+</div>
+<script>
+  layui.use(['form', 'table'], function () {
+    var form = layui.form,
+            layer = layui.layer,
+            table = layui.table,
+            $ = layui.$;
+
+    // 当前弹出层，防止ID被覆盖
+    var parentIndex = layer.index;
+
+
+    table.render({
+      elem: '#currentTableId1',
+      url: '/admin/userDeviceList?cardNo='+sessionStorage.getItem("adminCardNo")+"&state=all",
+      response: {
+        statusCode: 200 // 重新规定成功的状态码为 200，table 组件默认为 0
+      },
+      defaultToolbar: ['filter', 'exports', 'print', {
+        title: '提示',
+        layEvent: 'LAYTABLE_TIPS',
+        icon: 'layui-icon-tips'
+      }],
+      cols: [[
+        {type: "checkbox" },
+        {type: "numbers", title: "序号" },
+        {field: 'deviceNickName', title: '设备编号', sort: true},
+        {field: 'personName', title: '抖音号', sort: true},
+        {field: 'state', title: '状态', sort: true, templet: function(d){
+            if(new Date().getTime() - d.state < 1000*120 && new Date().getTime() - d.lastWorkingState <1000*30 ){
+              return '<span style="color: green">任务中</span>';
+            } else if (new Date().getTime() - d.state < 1000*120) {
+              return '<span style="color: blue">在线</span>';
+            } {
+              return '<span style="color: pink">离线</span>';
+            }
+          }},
+        {field: 'todayTaskNumber', title: '今日领取任务数', sort: true},
+        {field: 'todayTaskIntegral', title: '今日产生有效积分', sort: true},
+        {field: 'ip', title: '登录ip地址', sort: true},
+        // {fixed: 'right', title:'操作', width: 134, minWidth: 125, toolbar: '#barDemo'}
+      ]],
+      limits: [ 100,200,500,1000,1500],
+      limit: 200,
+      page: true,
+      skin: 'line'
+    });
+
+
+
+    //监听提交
+    form.on('submit(saveBtn)', function (data) {
+      // 关闭弹出层
+      layer.close(index);
+      layer.close(parentIndex);
+
+    });
+
+  });
+</script>

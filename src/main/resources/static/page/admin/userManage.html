@@ -1,0 +1,445 @@
+<div class="layuimini-container layuimini-page-anim" xmlns="http://www.w3.org/1999/html">
+  <div class="layuimini-main">
+
+    <fieldset class="table-search-fieldset">
+      <legend>开户</legend>
+      <div style="margin: 10px 10px 10px 10px">
+        <form class="layui-form layui-form-pane" action="">
+          <div class="layui-form-item">
+            <div class="layui-inline">
+              <label class="layui-form-label">开户账号</label>
+              <div class="layui-input-inline">
+                <input type="text"  lay-verify="required" name="cardNo" autocomplete="off" class="layui-input">
+              </div>
+            </div>
+            <div class="layui-inline">
+              <label class="layui-form-label">开户姓名</label>
+              <div class="layui-input-inline">
+                <input type="text"  lay-verify="required" name="realName" autocomplete="off" class="layui-input">
+              </div>
+            </div>
+            <div class="layui-inline">
+              <label class="layui-form-label">开户密码</label>
+              <div class="layui-input-inline">
+                <input type="password" lay-verify="required" name="password" autocomplete="off" class="layui-input">
+              </div>
+            </div>
+<!--            <div class="layui-inline">-->
+<!--              <label class="layui-form-label">姓名</label>-->
+<!--              <div class="layui-input-inline">-->
+<!--                <input type="text"  lay-verify="required" name="realName" autocomplete="off" class="layui-input">-->
+<!--              </div>-->
+<!--            </div>-->
+
+            <div class="layui-inline">
+              <button type="submit" class="layui-btn layui-btn-primary"  lay-submit lay-filter="data-search-btn">确认开户</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </fieldset>
+    <hr class="layui-border-green">
+
+
+    <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+
+    <script type="text/html" id="currentTableBar">
+      <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-on="test-iframe-handle" lay-event="check">历史申请</a>
+      <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-on="test-iframe-handle" lay-event="devices">设备</a>
+      <a class="layui-btn layui-btn-normal layui-btn-xs layui-btn-danger data-count-edit"   lay-event="change">设置</a>
+      <a class="layui-btn layui-btn-normal layui-btn-xs layui-btn-danger data-count-edit"   lay-event="password">密码</a>
+      <a class="layui-btn layui-btn-normal layui-btn-xs layui-btn-danger data-count-edit"   lay-event="delete">删除</a>
+    </script>
+  </div>
+</div>
+
+<script>
+  layui.use(['form', 'table','miniPage','element','util'], function () {
+    var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table,
+            miniPage = layui.miniPage;
+    flow = layui.flow
+
+
+    table.render({
+      elem: '#currentTableId',
+      url: '/admin/userList',
+      toolbar: '#toolbarDemo',
+      method:"post",
+      contentType:'application/json',
+      response: {
+        statusCode: 200 // 重新规定成功的状态码为 200，table 组件默认为 0
+      },
+      where:{
+        state:1
+      },
+      defaultToolbar: ['filter', 'exports', 'print', {
+        title: '提示',
+        layEvent: 'LAYTABLE_TIPS',
+        icon: 'layui-icon-tips'
+      }],
+
+      cols: [[
+        {type: "checkbox", width: 50},
+        {field: 'state', title: '状态', sort: true, templet: function(d){
+            if (d.state == 1) {
+              return '<span style="color: green">正常</span>'
+            }
+            else {
+              return '<span style=\"color: red\">已删除</span>'
+            }
+          }},
+        {field: 'cardNo', title: '账号', sort: true},
+        {field: 'realName', title: '姓名', sort: true},
+        {field: 'onlineDevices', title: '在线设备数量', sort: true,templet: function(d){
+           return d.waitDevices+d.workingDevices
+          }},
+        {field: 'workingDevices', title: '任务中设备数量', sort: true},
+        {field: 'waitDevices', title: '空闲设备数量', sort: true},
+        {field: 'tempIntegral', title: '今日已生成积分', sort: true},
+        {field: 'availableIntegral', title: '有效积分', sort: true},
+        {fixed: 'right',title: '提交核审积分', minWidth: 300, toolbar: '#currentTableBar', align: "center"}
+      ]],
+      limits: [50, 100,200,500],
+      limit: 50,
+      page: true,
+      skin: 'line'
+    });
+
+    // 监听搜索操作
+    form.on('submit(data-search-btn)', function (data) {
+      let result = JSON.stringify(data.field);
+      layer.confirm('确认开户？', {icon: 3}, function(){
+                var loadIndex = layer.load(0);
+                $.ajax({
+                  url:"/admin/creatAccount",
+                  data:result,
+                  type:"post",
+                  dataType:"json",
+                  headers : {'Content-Type' : 'application/json;charset=utf-8'}, //接口json格式
+                  success:function(data){
+                    console.log(data);
+
+                    if (data.code == 200) {
+
+                      layer.msg("开户成功", {icon: 1});
+                      //执行搜索重载
+                      table.reload('currentTableId', {
+                        page: {
+                          curr: 1
+                        },
+                        where:{
+                          state:1
+                        },
+                      }, 'data');
+                    }
+                    else {
+                      layer.msg(data.msg, {icon: 2});
+                    }
+                    layer.close(loadIndex)
+                  },
+                  error:function(data){
+                    layer.msg('发布失败', {icon: 2});
+                    layer.close(loadIndex)
+                  }
+                })},
+              function(){
+                layer.msg('取消成功');
+              });
+          return false;
+    });
+    // form.on('submit(data-search-btn1)', function (data) {
+    //   let result = JSON.stringify(data.field);
+    //
+    //             var loadIndex = layer.load(0);
+    //                   //执行搜索重载
+    //                   table.reload('currentTableId', {
+    //                     page: {
+    //                       curr: 1
+    //                     }
+    //                     , where: {
+    //
+    //                     }
+    //                   }, 'data');
+    //
+    //             layer.close(loadIndex)
+    //
+    // });
+    /**
+     * toolbar事件监听
+     */
+    // table.on('toolbar(currentTableFilter)', function (obj) {
+    //     if (obj.event === 'add') {   // 监听添加操作
+    //         var content = miniPage.getHrefContent('page/table.html');
+    //         var openWH = miniPage.getOpenWidthHeight();
+    //
+    //         var index = layer.open({
+    //             title: '添加用户',
+    //             type: 1,
+    //             shade: 0.2,
+    //             maxmin:true,
+    //             shadeClose: true,
+    //             area: [openWH[0] + 'px', openWH[1] + 'px'],
+    //             offset: [openWH[2] + 'px', openWH[3] + 'px'],
+    //             content: content,
+    //         });
+    //         $(window).on("resize", function () {
+    //             layer.full(index);
+    //         });
+    //     } else if (obj.event === 'delete') {  // 监听删除操作
+    //         var checkStatus = table.checkStatus('currentTableId')
+    //             , data = checkStatus.data;
+    //         layer.alert(JSON.stringify(data));
+    //     }
+    // });
+
+    //监听表格复选框选择
+    // table.on('checkbox(currentTableFilter)', function (obj) {
+    //     console.log(obj)
+    // });
+
+    table.on('tool(currentTableFilter)', function (obj) {
+      var data1 = obj.data;
+      if (obj.event === 'check') {
+        sessionStorage.setItem("adminCardNo",data1.cardNo)
+        var content = miniPage.getHrefContent('./userExchangeListTable.html?cardNo='+data1.cardNo);
+        var openWH = miniPage.getOpenWidthHeight();
+
+        var index = layer.open({
+          title: '历史申请',
+          type: 1,
+          shade: 0.2,
+          maxmin:true,
+          shadeClose: true,
+          area: [openWH[0] + 'px', openWH[1] + 'px'],
+          offset: [openWH[2] + 'px', openWH[3] + 'px'],
+          content: content,
+        });
+        $(window).on("resize", function () {
+          layer.full(index);
+        });
+
+
+
+      } else if (obj.event === 'change') {
+
+          layer.open({
+            type: 1,
+            area: '350px',
+            resize: false,
+            shadeClose: true,
+            title: '修改用户有效积分',
+            content: `
+          <div class="layui-form" lay-filter="filter-test-layer" style="margin: 16px;">
+            <div class="demo-login-container">
+              <div class="layui-form-item">
+                <div class="layui-input-wrap">
+
+                  <input type="text" name="tempIntegral" value="" lay-verify="required|number" placeholder="设置有效积分" lay-reqtext="请填写积分" autocomplete="off" class="layui-input" lay-affix="clear">
+                </div>
+              </div>
+              <div class="layui-form-item">
+                <button class="layui-btn layui-btn-fluid" lay-submit lay-filter="demo-login">确定</button>
+              </div>
+              <div class="layui-form-item demo-login-other">
+
+              </div>
+            </div>
+          </div>
+        `,
+            success: function(){
+              // 对弹层中的表单进行初始化渲染
+              form.render();
+              // 表单提交事件
+              form.on('submit(demo-login)', function(data){
+                var field = data.field; // 获取表单字段值
+               let d = {"cardNo":data1.cardNo,"tempIntegral":field.tempIntegral}
+                // 此处可执行 Ajax 等操作
+                $.ajax({
+                  url:"/admin/setUserIntegral",
+                  data:JSON.stringify(d),
+                  type:"post",
+                  dataType:"json",
+                  headers : {'Content-Type' : 'application/json;charset=utf-8'}, //接口json格式
+                  success:function(data){
+                    console.log(data);
+                    if (data.code == 200) {
+                      layer.close(index);
+                      layer.msg("设置成功", {icon: 1});
+                      //执行搜索重载
+                      table.reload('currentTableId', {
+                        page: {
+                          curr: 1
+                        },
+                        where:{
+                          state:1
+                        },
+                      }, 'data');
+                    }
+                    else {
+                      layer.msg(data.data, {icon: 2});
+                    }
+                  },
+                  error:function(data){
+                    layer.msg('删除失败', {icon: 2});
+                  }
+                })
+                return false; // 阻止默认 form 跳转
+              });
+            }
+          });
+
+      }
+      else if (obj.event === 'devices' ){
+
+        sessionStorage.setItem("adminCardNo",data1.cardNo)
+        var content = miniPage.getHrefContent('./userDeviceTable.html?cardNo='+data1.cardNo);
+        var openWH = miniPage.getOpenWidthHeight();
+
+        var index = layer.open({
+          title: '设备列表',
+          type: 1,
+          shade: 0.2,
+          maxmin:true,
+          shadeClose: true,
+          area: [openWH[0] + 'px', openWH[1] + 'px'],
+          offset: [openWH[2] + 'px', openWH[3] + 'px'],
+          content: content,
+        });
+        $(window).on("resize", function () {
+          layer.full(index);
+        });
+
+
+      }else if (obj.event === 'delete' ) {
+
+        layer.confirm('确定删除用户？', {icon: 3}, function(){
+          $.ajax({
+            url:"/admin/deleteUser?cardNo="+data1.cardNo,
+            type:"Get",
+            dataType:"json",
+            headers : {'Content-Type' : 'application/json;charset=utf-8'}, //接口json格式
+            success:function(data){
+              console.log(data);
+              if (data.code == 200) {
+                layer.close(index);
+                layer.msg("删除成功", {icon: 1});
+                //执行搜索重载
+                table.reload('currentTableId', {
+                  page: {
+                    curr: 1
+                  }, where:{
+                    state:1
+                  },
+                }, 'data');
+              }
+              else {
+                layer.msg(data.data, {icon: 2});
+              }
+            },
+            error:function(data){
+              layer.msg('删除失败', {icon: 2});
+            }
+          })
+
+
+
+
+        }, function(){
+          layer.msg('已取消');
+        });
+
+
+
+
+      }else if (obj.event == "password") {
+
+
+        layer.open({
+          type: 1,
+          area: '350px',
+          resize: false,
+          shadeClose: true,
+          title: '修改用户密码',
+          content: `
+          <div class="layui-form" lay-filter="filter-test-layer" style="margin: 16px;">
+            <div class="demo-login-container">
+              <div class="layui-form-item">
+                <div class="layui-input-wrap">
+
+                  <input type="text" name="password" value="" lay-verify="required" placeholder="设置用户密码" lay-reqtext="请填写密码" autocomplete="off" class="layui-input" lay-affix="clear">
+                </div>
+              </div>
+              <div class="layui-form-item">
+                <button class="layui-btn layui-btn-fluid" lay-submit lay-filter="demo-login">确定</button>
+              </div>
+              <div class="layui-form-item demo-login-other">
+
+
+              </div>
+            </div>
+          </div>
+        `,
+          success: function(){
+            // 对弹层中的表单进行初始化渲染
+            form.render();
+            // 表单提交事件
+            form.on('submit(demo-login)', function(data){
+              var field = data.field; // 获取表单字段值
+              let d = {"cardNo":data1.cardNo,"password":field.password}
+              // 此处可执行 Ajax 等操作
+              $.ajax({
+                url:"/admin/setUserPassword",
+                data:JSON.stringify(d),
+                type:"post",
+                dataType:"json",
+                headers : {'Content-Type' : 'application/json;charset=utf-8'}, //接口json格式
+                success:function(data){
+                  console.log(data);
+                  if (data.code == 200) {
+                    layer.close(index);
+                    layer.msg("设置成功", {icon: 1});
+                    //执行搜索重载
+                    table.reload('currentTableId', {
+                      page: {
+                        curr: 1
+                      },
+                      where:{
+                        state:1
+                      },
+                    }, 'data');
+                  }
+                  else {
+                    layer.msg(data.data, {icon: 2});
+                  }
+                },
+                error:function(data){
+                  layer.msg('设置失败', {icon: 2});
+                }
+              })
+              return false; // 阻止默认 form 跳转
+            });
+          }
+        });
+
+
+      }
+
+      return false;
+      
+    });
+
+  });
+  function timestampToTime(timestamp) {
+    timestamp = timestamp ? timestamp : null;
+    let date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+    let Y = date.getFullYear() + '-';
+    let M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+    let D = (date.getDate() < 10 ? '0' + date.getDate() : date.getDate()) + ' ';
+    let h = (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + ':';
+    let m = (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()) + ':';
+    let s = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
+    return Y + M + D + h + m + s;
+  }
+  </script>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.Mapper.TaskMapper">
+
+
+    <insert id="insertDeviceData"  parameterType="java.util.List">
+        insert into devicedata(cardNo, deviceId, deviceNickName,roomId,personName,`state`, startWorkingState,lastWorkingState, duration,date)
+        values
+        <foreach collection="deviceDataList" item="device" index="index" separator=",">
+            (#{device.cardNo},#{device.deviceId},#{device.deviceNickName},#{device.roomId},#{device.personName},#{device.state},#{device.startWorkingState},#{device.lastWorkingState},#{device.duration},now())
+        </foreach>
+    </insert>
+
+
+    <update id="updateUser" parameterType="java.util.List" >
+        update user
+        set tempIntegral=
+        <foreach collection="userList" item="item" index="index"
+                 separator=" " open="case cardNo" close="end">
+            when #{item.cardNo} then  tempIntegral+#{item.tempIntegral}
+        </foreach>
+        where cardNo in
+        <foreach collection="userList" index="index" item="item"
+                 separator="," open="(" close=")">
+               #{item.cardNo}
+        </foreach>
+    </update>
+
+<select id="getTaskList">
+
+    select * from test.tasktable
+    order by realDieTime desc
+    <if test="pageSize!=null and size!=null ">
+        limit #{pageSize},#{size}
+    </if>
+
+
+
+
+
+</select>
+    <select id="getTaskListCount">
+        select count(*) from test.tasktable
+
+    </select>
+<select id="getTempTaskList">
+
+    select * from test.temptasktable
+    <if test="pageSize!=null and size!=null ">
+        limit #{pageSize},#{size}
+    </if>
+</select>
+<select id="getTempTaskListCount">
+    select count(*)
+    from test.temptasktable
+
+</select>
+    <delete id="deleteHistoryTasks"  parameterType="java.util.List">
+        delete from tasktable
+        where id in (
+        <foreach collection="taskDataList" item="taskData" index="index" separator=",">
+            #{taskData.id}
+        </foreach>)
+
+
+    </delete>
+
+
+
+</mapper>

@@ -1,0 +1,186 @@
+<style>
+    .layui-form-item .layui-input-company {width: auto;padding-right: 10px;line-height: 38px;}
+</style>
+<div class="layuimini-container layuimini-page-anim">
+    <div class="layuimini-main">
+
+        <div class="layui-form layuimini-form ">
+            <div class="layui-form-item">
+                <label class="layui-form-label "  >账号</label>
+                <div  class="layui-input-inline layui-input-wrap" style="padding-top: 10px;" id="cardNo" >
+
+                </div>
+            </div>
+
+<!--            <div class="layui-form-item">-->
+<!--                <label class="layui-form-label "  >姓名</label>-->
+<!--                <div  class="layui-input-inline layui-input-wrap" style="padding-top: 10px;" id="realName" >-->
+
+<!--                </div>-->
+<!--            </div>-->
+            <div class="layui-form-item">
+                <label class="layui-form-label">姓名</label>
+                <div  class="layui-input-inline layui-input-wrap"   >
+                    <input type="text" name="price_min" id="realName" autocomplete="off" class="layui-input">
+                </div>
+                <button class="layui-btn layui-btn-normal" lay-submit id="saveBtn">确认保存</button>
+<!--                <div class="layui-input-inline" style="width: 100px;">-->
+<!--                  -->
+<!--                </div>-->
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label " >今日积分:</label>
+                <div  class="layui-input-inline layui-input-wrap" id="todayIntegral" style="color: red;padding-top: 10px"></div>
+            </div>
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label " >可用积分:</label>
+                <div  class=" layui-input-inline layui-input-wrap" id="availableIntegral" style="color: red;padding-top: 10px"></div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">二维码</label>
+                <div  class="layui-input-inline layui-input-wrap">
+                    <button  type="button" class="layui-btn" id="ID-upload-demo-btn">
+                    <i class="layui-icon layui-icon-upload"></i>二维码上传
+                </button>
+                    <div class="layui-input-inline layui-input-wrap" style="width: 132px;">
+                        <div class="layui-upload-list">
+                            <img class="layui-upload-img" id="ID-upload-demo-img" style="width: 100%; height: 92px;">
+                        </div>
+                    </div>
+             </div>
+            </div>
+<!--            <div class="layui-form-item">-->
+<!--                <label class="layui-form-label">邮箱</label>-->
+<!--                <div class="layui-input-block">-->
+<!--                    <input type="email" id="email" lay-verify="email"  placeholder="请输入邮箱"   class="layui-input">-->
+<!--                </div>-->
+<!--            </div>-->
+        
+
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+<!--                    <button class="layui-btn layui-btn-normal" lay-submit id="saveBtn">确认保存</button>-->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+
+    layui.use(['form','miniPage','upload'], function () {
+            layer = layui.layer,
+            miniPage = layui.miniPage;
+        var upload = layui.upload;
+        var $ = layui.$;
+        /**
+         * 初始化表单，要加上，不然刷新部分组件可能会不加载
+         */
+        // form.render({
+        // })
+        // form.val("saveBtn",{
+        //     "email":"5296@qq.com"
+        //
+        // })
+
+
+
+        // 单图片上传
+        var uploadInst = upload.render({
+            elem: '#ID-upload-demo-btn',
+            url: '/user/qrUpload', // 实际使用时改成您自己的上传接口即可。
+            before: function(obj){
+                // 预读本地文件示例，不支持ie8
+                obj.preview(function(index, file, result){
+                    $('#ID-upload-demo-img').attr('src', result); // 图片链接（base64）
+                });
+
+                var msg =   layer.msg('上传中', {icon: 16, time: 12});
+
+             },
+            done: function(res){
+                // 若上传失败
+                if(res.code < 0){
+                    return layer.msg('上传失败');
+                }
+
+                // 上传成功的一些操作
+                // …
+                $('#ID-upload-demo-text').html(''); // 置空上传失败的状态
+
+            },
+
+
+        });
+           $('#saveBtn').click(function (){
+
+               $.ajax({
+                   url:"/user/setMyInfo",
+                   data:JSON.stringify({'realName':$('#realName').val()}),
+                   type:"post",
+                   dataType:"json",
+                   headers : {'Content-Type' : 'application/json;charset=utf-8'}, //接口json格式
+                   success:function(data){
+                       console.log(data);
+                       if (data.code == 200) {
+                           layer.msg("修改成功", {icon: 1});
+                       }
+                       else {
+                           layer.msg(data.msg, {icon: 2});
+                       }
+                   },
+                   error:function(data){
+                       layer.msg('请求失败', {icon: 2});
+                   }
+               });
+           });
+
+
+        $(function(){
+            $.ajax({
+                url:"/user/myInfo",
+                data:{},
+                type:"get",
+                dataType:"json",
+                headers : {'Content-Type' : 'application/json;charset=utf-8'}, //接口json格式
+                success:function(data){
+                    console.log(data);
+                    if (data.code == 200) {
+                        let d =data.data
+                        console.log(d)
+                        $('#cardNo').html(d.cardNo)
+                        $('#phone').html(d.phone)
+                        $('#realName').val(d.realName)
+                        // "今日积分:"+
+                        $('#todayIntegral').html(d.tempIntegral)
+                        $('#availableIntegral').html(d.availableIntegral)
+                        $('#email').val(d.email)
+                        $('#ID-upload-demo-img').attr('src', d.qrUrl);
+                    }
+                    else {
+                        layer.msg(data.data, {icon: 2});
+                    }
+                },
+                error:function(data){
+                    layer.msg('请求失败', {icon: 2});
+                }
+            });
+
+
+        });
+
+
+
+        //监听提交
+        // form.on('submit(saveBtn)', function (data) {
+        //     var index = layer.alert(JSON.stringify(data.field), {
+        //         title: '最终的提交信息'
+        //     }, function () {
+        //         layer.close(index);
+        //         miniPage.hashHome();
+        //     });
+        //     return false;
+        // });
+
+    });
+</script>

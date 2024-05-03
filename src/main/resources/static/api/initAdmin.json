@@ -1,0 +1,54 @@
+{
+  "homeInfo": {
+    "title": "首页",
+    "href": "welcome-1.html"
+  },
+  "logoInfo": {
+    "title": "LAYUI MINI",
+    "image": "../../images/logo.png",
+    "href": ""
+  },
+  "menuInfo": [
+    {
+      "title": "总览",
+      "icon": "fa fa-address-book",
+      "href": "",
+      "target": "_self",
+      "child": [
+          {
+          "title": "首页",
+          "href": "welcome-1.html",
+          "icon": "fa fa-file-text",
+          "target": "_self"
+        }
+      ]
+    },
+    {
+      "title": "用户管理",
+      "icon": "fa fa-male",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "用户管理",
+          "href": "userManage.html",
+          "icon": "fa fa-user",
+          "target": "_self"
+        },
+        {
+          "title": "任务管理",
+          "href": "taskManage.html",
+          "icon": "fa fa-file-text",
+          "target": "_self"
+        },
+        {
+          "title": "积分审核",
+          "href": "integralManage.html",
+          "icon": "fa fa-file-text",
+          "target": "_self"
+        }
+
+      ]
+    }
+  ]
+}

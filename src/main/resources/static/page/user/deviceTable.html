@@ -1,0 +1,376 @@
+<div class="layuimini-container layuimini-page-anim">
+
+
+
+
+    <div class="layuimini-main welcome">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-row layui-col-space20">
+                    <div class="layui-col-md12">
+                        <div class="layui-card">
+                            <div class="layui-card-header"><i class="fa fa-warning icon"></i>数据统计</div>
+                            <div class="layui-card-body">
+                                <div class="welcome-module">
+                                    <div class="layui-row layui-col-space3">
+                                        <div class="layui-col-xs4">
+                                            <div class="panel layui-bg-number">
+                                                <div class="panel-body">
+                                                    <div class="panel-title">
+<!--                                                        <span class="label pull-right layui-bg-blue">.</span>-->
+                                                        <h5>在线设备数</h5>
+                                                    </div>
+                                                    <div class="panel-content">
+                                                        <h1 class="no-margins" id="totalOnlineDevice">0</h1>
+                                                        <small>当前在线设备数量</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="layui-col-xs4">
+                                            <div class="panel layui-bg-number">
+                                                <div class="panel-body">
+                                                    <div class="panel-title">
+<!--                                                        <span class="label pull-right layui-bg-cyan">.</span>-->
+                                                        <h5>任务中设备数</h5>
+                                                    </div>
+                                                    <div class="panel-content">
+                                                        <h1 class="no-margins" id="workingDevices">0</h1>
+                                                        <small>当前任务中设备数</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="layui-col-xs4">
+                                            <div class="panel layui-bg-number">
+                                                <div class="panel-body">
+                                                    <div class="panel-title">
+<!--                                                        <span class="label pull-right layui-bg-orange">.</span>-->
+                                                        <h5>空闲设备数</h5>
+                                                    </div>
+                                                    <div class="panel-content">
+                                                        <h1 class="no-margins" id="waitDevices">0</h1>
+                                                        <small>当前空闲设备数</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="layui-col-xs4">
+                                            <div class="panel layui-bg-number">
+                                                <div class="panel-body">
+                                                    <div class="panel-title">
+<!--                                                        <span class="label pull-right layui-bg-green">.</span>-->
+                                                        <h5>离线设备</h5>
+                                                    </div>
+                                                    <div class="panel-content">
+                                                        <h1 class="no-margins" id="outWorkDevices">0</h1>
+                                                        <small>离线设备</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="layui-col-xs4">
+                                            <div class="panel layui-bg-number">
+                                                <div class="panel-body">
+                                                    <div class="panel-title">
+                                                        <!--                                                        <span class="label pull-right layui-bg-orange">实时</span>-->
+                                                        <h5>设备总数</h5>
+                                                    </div>
+                                                    <div class="panel-content">
+                                                        <h1 class="no-margins" id="totalDevices">0</h1>
+                                                        <small>设备总数</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="layui-col-xs4">
+                                            <div class="panel layui-bg-number">
+                                                <div class="panel-body">
+                                                    <div class="panel-title">
+<!--                                                        <span class="label pull-right layui-bg-orange"></span>-->
+                                                        <h5>今日设备生产积分</h5>
+                                                    </div>
+                                                    <div class="panel-content">
+                                                        <h1 class="no-margins" id="todayTotalTaskIntegral">0</h1>
+                                                        <small>今日设备生产积分</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+<!--        <script>-->
+<!--            layui.use(['layer','echarts'], function () {-->
+<!--                var $ = layui.jquery,-->
+<!--                    layer = layui.layer,-->
+<!--                    echarts = layui.echarts;-->
+<!--                //初始化 每几秒刷新一次-->
+<!--                setInterval(function(){ $.ajax({-->
+<!--                        url:"/admin/welcomeInfo",-->
+<!--                        type:"get",-->
+<!--                        dataType:"json",-->
+<!--                        headers : {'Content-Type' : 'application/json;charset=utf-8'}, //接口json格式-->
+<!--                        success:function(data){-->
+<!--                            if (data.code == 200) {-->
+<!--                                $("#workingDevices").html(data.data.workingDevices)-->
+<!--                                $("#waitDevices").html(data.data.waitDevices)-->
+<!--                                if (data.data.workingDevices != null || data.data.waitDevices != null) {-->
+<!--                                    $("#totalOnlineDevice").html((data.data.workingDevices+data.data.waitDevices))-->
+<!--                                    console.log(data.data.workingDevices+data.data.waitDevices)-->
+<!--                                }-->
+<!--                                $("#todayTotalIntegral").html(data.data.todayTotalIntegral)-->
+<!--                                $("#todayExchangeIntegral").html(data.data.todayExchangeIntegral)-->
+<!--                                $("#todayAlreadyExchangeIntegral").html(data.data.todayAlreadyExchangeIntegral)-->
+<!--                                // if (data.data.todayAlreadyExchangeIntegral!= null) {-->
+<!--                                //     $("#totalOnlineDevice").html(parseInt(data.data.todayAlreadyExchangeIntegral)+parseInt(data.data.todayAlreadyExchangeIntegral))-->
+<!--                                // }-->
+
+
+<!--                            }-->
+
+<!--                        },-->
+<!--                        error:function(data){-->
+<!--                            layer.msg('连接失败', {icon: 2});-->
+
+<!--                        }-->
+<!--                    })}-->
+<!--                    ,3000);-->
+
+
+
+
+
+<!--            });-->
+<!--        </script>-->
+    </div>
+
+
+
+    <div class="layuimini-main">
+
+
+        <script type="text/html" id="toolbarDemo">
+            <h3>设备列表</h3>
+             <div class="layui-btn-container">
+                <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="online"> 在线 </button>
+                 <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="offline"> 离线 </button>
+                <button class="layui-btn layui-btn-sm  data-delete-btn" lay-event="working"> 任务中 </button>
+
+             </div>
+        </script>
+
+        <table class="layui-hide" id="currentTableId" lay-filter="currentTableFilter"></table>
+
+        <!-- <script type="text/html" id="currentTableBar">
+            <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit">编辑</a>
+            <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete" lay-event="delete">删除</a>
+        </script> -->
+
+    </div>
+</div>
+<script type="text/html" id="barDemo">
+    <div class="layui-clear-space">
+        <a class="layui-btn layui-btn-xs" lay-event="delete">删除</a>
+
+    </div>
+</script>
+<script>
+    console.log(new Date().getTime())
+    layui.use(['form', 'table','miniPage','element'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table,
+            miniPage = layui.miniPage;
+
+        table.render({
+            elem: '#currentTableId',
+            url: '/user/deviceDataList',
+            where:{
+                state:"all"
+            },
+            parseData:function(res){
+                let totalDevices = res.data.length
+                let workingDevices= 0;
+                let waitDevices = 0;
+                let outWorkDevices =0;
+                let onLineDevices = 0;
+                let todayTotalTaskIntegral = 0
+                let timeNow = new Date().getTime()
+
+                for (let i = 0; i < res.data.length; i++) {
+                    if(timeNow - res.data[i].state < 1000*100 && timeNow - res.data[i].lastWorkingState <1000*20 ){
+                        workingDevices++;
+                    } else if (timeNow - res.data[i].state < 1000*100) {
+                        waitDevices++;
+                    }
+                    else {
+                       outWorkDevices++;
+                    }
+                    todayTotalTaskIntegral += res.data[i].todayTaskIntegral
+
+                }
+
+
+
+                $("#workingDevices").html(workingDevices)
+                $("#totalDevices").html(totalDevices)
+                $("#waitDevices").html(waitDevices)
+                $("#totalOnlineDevice").html((workingDevices+waitDevices))
+                $("#outWorkDevices").html(outWorkDevices)
+                $("#todayTotalTaskIntegral").html(todayTotalTaskIntegral)
+                    // console.log(data.data.workingDevices+data.data.waitDevices)
+
+                // $("#todayTotalIntegral").html(data.data.todayTotalIntegral)
+                // $("#todayExchangeIntegral").html(data.data.todayExchangeIntegral)
+                // $("#todayAlreadyExchangeIntegral").html(data.data.todayAlreadyExchangeIntegral)
+                return {
+                    "code": res.code, // 解析接口状态
+                    "count": res.msg,
+                    "data":res.data
+                     // 解析数据长度
+                }
+            },
+            response: {
+                statusCode: 200 // 重新规定成功的状态码为 200，table 组件默认为 0
+            },
+            toolbar: '#toolbarDemo',
+            defaultToolbar: ['filter', 'exports', 'print', {
+                title: '提示',
+                layEvent: 'LAYTABLE_TIPS',
+                icon: 'layui-icon-tips'
+            }],
+            cols: [[
+                {type: "checkbox", },
+                {type: "numbers", title: "序号" },
+                // {field: 'id', title: '序号', sort: true},
+                {field: 'deviceNickName', title: '设备编号', sort: true},
+                {field: 'state', title: '状态', sort: true, templet: function(d){
+                        if(new Date().getTime() - d.state < 1000*100 && new Date().getTime() - d.lastWorkingState <1000*20 ){
+                            return '<span style="color: green">任务中</span>';
+                        } else if (new Date().getTime() - d.state < 1000*100) {
+                            return '<span style="color: blue">在线</span>';
+                        } {
+                            return '<span style="color: pink">离线</span>';
+                        }
+                    }},
+                {field: 'personName', title: '抖音名称', sort: true},
+                {field: 'todayTaskNumber', title: '今日领取任务数', sort: true},
+                {field: 'todayTaskIntegral', title: '今日产生有效积分', sort: true},
+                {fixed: 'right', title:'操作', width: 134, minWidth: 125, toolbar: '#barDemo'}
+            ]],
+            limits: [ 50, 100,1000,1500],
+            limit: 1000,
+            page: true,
+            skin: 'line'
+        });
+
+        // 监听搜索操作
+        form.on('submit(data-search-btn)', function (data) {
+            var result = JSON.stringify(data.field);
+            layer.alert(result, {
+                title: '最终的搜索信息'
+            });
+
+            //执行搜索重载
+            table.reload('currentTableId', {
+                page: {
+                    curr: 1
+                }
+                , where: {
+                    searchParams: result
+                }
+            }, 'data');
+
+            return false;
+        });
+
+        /**
+         * toolbar事件监听
+         */
+        table.on('toolbar(currentTableFilter)', function (obj) {
+            if (obj.event === 'online') {   //
+
+                //执行搜索重载
+                table.reload('currentTableId', {
+                    page: {
+                        curr: 1
+                    }
+                    , where: {
+                        state: "online"
+                    }
+                }, 'data');
+
+
+            } else if (obj.event === 'working') {  //
+                //执行搜索重载
+                table.reload('currentTableId', {
+                    page: {
+                        curr: 1
+                    }
+                    , where: {
+                        state: "working"
+                    }
+                }, 'data');
+
+            }else if(obj.event === 'offline'){  //
+                //执行搜索重载
+                table.reload('currentTableId', {
+                    page: {
+                        curr: 1
+                    }
+                    , where: {
+                        state: "offline"
+                    }
+                }, 'data');
+
+            }
+            return false;
+        });
+
+        //监听表格复选框选择
+        table.on('checkbox(currentTableFilter)', function (obj) {
+
+            console.log(obj)
+        });
+
+        table.on('tool(currentTableFilter)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'edit') {
+
+                var content = miniPage.getHrefContent('page/table/add.html');
+                var openWH = miniPage.getOpenWidthHeight();
+
+                var index = layer.open({
+                    title: '编辑用户',
+                    type: 1,
+                    shade: 0.2,
+                    maxmin:true,
+                    shadeClose: true,
+                    area: [openWH[0] + 'px', openWH[1] + 'px'],
+                    offset: [openWH[2] + 'px', openWH[3] + 'px'],
+                    content: content,
+                });
+                $(window).on("resize", function () {
+                    layer.full(index);
+                });
+                return false;
+            } else if (obj.event === 'delete') {
+                layer.confirm('真的删除行么', function (index) {
+                    obj.del();
+                    layer.close(index);
+                });
+            }
+        });
+
+    });
+</script>
