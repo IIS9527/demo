@@ -51,10 +51,13 @@ public class TaskData {
 
     public String sign;
 
+    public String personAddress;
+
 
     public  Long  creatIntegral;
 
     public List<DeviceData> deviceDataList;
+
 
     public Long getCreatIntegral() {
         if(creatIntegral == null ){
@@ -63,5 +66,7 @@ public class TaskData {
         return creatIntegral;
     }
 
-
+    public void setPersonAddress(String personAddress) {
+        this.personAddress = personAddress;
+    }
 }

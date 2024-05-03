@@ -377,8 +377,8 @@ boolean lock = false;
        Long duration= DateUtil.between( DateUtil.parse(taskData.beginTimeFrom),DateUtil.parse(taskData.beginTimeTo), DateUnit.MINUTE);
         if (duration<10){
             return AjaxResult.fail(404,"任务小于十分钟");
-
         }
+
         if (DateUtil.compare( DateUtil.parse(taskData.beginTimeTo),DateUtil.date())<1){
 
             return AjaxResult.fail(404,"任务最终时间必须大于当前时间");
@@ -399,26 +399,50 @@ boolean lock = false;
             return AjaxResult.fail(404,"请输入任务每分钟积分");
         }
 
-        if (StrUtil.isEmptyIfStr(taskData.getRoomId())|| StrUtil.isEmptyIfStr(taskData.getVideoName())){
+        if (StrUtil.isEmptyIfStr(taskData.getRoomId()) || StrUtil.isEmptyIfStr(taskData.getVideoName())){
 
-            if (taskData.roomAddress ==null || taskData.roomAddress.length()== 0){
-                return AjaxResult.fail(404,"请输入地址");
+            if (taskData.getRoomAddress() !=null && !taskData.getRoomAddress().isEmpty()){
+                //解析直播间roomId
+                String roomId = xiguaAddress.getRoomId(taskData.roomAddress);
+
+                if (roomId.equals("false")){
+                    return AjaxResult.fail(404,"地址解析错误");
+                }
+
+                //获取直播人名
+                String videoName = xiguaAddress.getVideoName(taskData.roomAddress);
+                if (videoName.equals("false")){
+                    return AjaxResult.fail(404,"直播人地址解析错误");
+                }
+
+                taskData.setRoomId(roomId);
+                taskData.setVideoName(videoName);
+            }
+            else if (taskData.getPersonAddress() !=null && !taskData.getPersonAddress().isEmpty()){
+                //解析直播间roomId
+                String roomId = xiguaAddress.getRoomIdByPersonAddress(taskData.getPersonAddress());
+
+                if (roomId == null){
+                    return AjaxResult.fail(404,"地址解析错误");
+                }
+
+                //获取直播人名
+                String videoName = xiguaAddress.getNickNameByPersonAddress(taskData.getPersonAddress());
+                if (videoName == null){
+                    return AjaxResult.fail(404,"直播人地址解析错误");
+                }
+
+                taskData.setRoomId(roomId);
+                taskData.setVideoName(videoName);
+
+
+
             }
 
-            //解析直播间roomId
-            String roomId = xiguaAddress.getRoomId(taskData.roomAddress);
 
-            if (roomId.equals("false")){
-                return AjaxResult.fail(404,"地址解析错误");
-            }
 
-            //获取直播人名
-            String videoName = xiguaAddress.getVideoName(taskData.roomAddress);
-            if (videoName.equals("false")){
-                return AjaxResult.fail(404,"直播人地址解析错误");
-            }
-            taskData.setRoomId(roomId);
-            taskData.setVideoName(videoName);
+
+
         }
 
        if (!NumberUtil.isNumber(taskData.getRoomId())){
@@ -438,7 +462,6 @@ boolean lock = false;
 
        }
        else{ // 加入临时任务表
-             taskData.setId(IdUtil.randomUUID());
              log.info("addTempTask {}",taskData);
          if ( taskMapper.addTempTask(taskData)){
           return  AjaxResult.success();
@@ -526,15 +549,25 @@ boolean lock = false;
         if (taskData.getId()==null || taskData.getId().length() ==0){
            return AjaxResult.fail(-1,"请输入正确roomId");
         }
+        if (isNumeric0(taskData.getId())){
+            if (taskMapper.selectCountByIdTempTask(Integer.valueOf(taskData.getId())) == 1){
+                taskMapper.deleteTempTask(taskData);
+                return AjaxResult.success();
+            }
+        }
+        else {
             for (int i=0; i<taskDataList.size();i++){
                 if (taskData.getId().equals(taskDataList.get(i).getId())){
                     //删除任务总方法
-                  Boolean  delete = taskModel.deleteTaskById(taskData.getId());
-                        if (delete){
-                            return AjaxResult.success();
-                        }
+                    Boolean  delete = taskModel.deleteTaskById(taskData.getId());
+                    if (delete){
+                        return AjaxResult.success();
+                    }
                 }
             }
+        }
+
+
         return  AjaxResult.fail(404,"没有找到任务");
     }
 
@@ -769,8 +802,16 @@ boolean lock = false;
         return null;
     }
 
+    public static boolean isNumeric0(String str) {
 
-
+        for(int i=str.length();--i>=0;)
+        {
+        int chr=str.charAt(i);
+        if(chr<48 || chr>57)
+            return false;
+        }
+        return true;
+    }
 
 }
 

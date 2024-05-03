@@ -47,6 +47,9 @@ public interface TaskMapper {
     @Select({"select * from tempTaskTable "})
     List<TaskData> selectAllTempTask();
 
+    @Select({"select count(1) from tempTaskTable where id = #{id} "})
+    Integer selectCountByIdTempTask(@Param("id")Integer id);
+
     @Delete({"delete from tempTaskTable where id= #{taskData.id}"})
     boolean deleteTempTask(@Param("taskData") TaskData taskData);
 
