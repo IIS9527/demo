@@ -2380,3 +2380,9 @@ java.sql.SQLSyntaxErrorException: You have an error in your SQL syntax; check th
 2024-05-03T17:09:04.681+08:00  INFO 11636 --- [main] o.apache.http.impl.execchain.RetryExec   : I/O exception (java.net.SocketException) caught when processing request to {s}->https://v.douyin.com:443: Connection reset
 2024-05-03T17:09:04.682+08:00  INFO 11636 --- [main] o.apache.http.impl.execchain.RetryExec   : Retrying request to {s}->https://v.douyin.com:443
 2024-05-03T17:09:04.697+08:00  INFO 11636 --- [main] com.example.demo.Address.XiguaAddress    : java.net.SocketException: Connection reset
+2024-05-03T17:09:20.006+08:00  INFO 12876 --- [scheduling-1] c.e.demo.common.DynamicScheduleTask      : 检查过期任务 
+2024-05-03T17:09:40.010+08:00  INFO 12876 --- [scheduling-1] c.e.demo.common.DynamicScheduleTask      : 检查过期任务 
+2024-05-03T17:09:43.162+08:00  INFO 12876 --- [http-nio-8999-exec-4] c.example.demo.Config.LoginInterceptor   : LoginInterceptor start
+2024-05-03T17:09:43.163+08:00  INFO 12876 --- [http-nio-8999-exec-4] c.example.demo.Config.LoginInterceptor   : admin:1000,User:User(cardNo=haha, password=null, realName=张三, phone=null, permissions=1000, state=1, email=1234555@qq.com, qrUrl=/user/qrImg/72e7c0bb29d14920b222fd428b4dacfd.png, devices=null, totalIntegral=0, freezeIntegral=0, tempIntegral=0, availableIntegral=4550, createdTime=null, workingDevices=null, waitDevices=null)
+2024-05-03T17:09:43.164+08:00  INFO 12876 --- [http-nio-8999-exec-4] c.e.demo.Controller.AdminController      : AllUserTempIntegral:3047200
+2024-05-03T17:10:00.007+08:00  INFO 12876 --- [scheduling-1] c.e.demo.common.DynamicScheduleTask      : 检查过期任务 
