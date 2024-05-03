@@ -24,7 +24,7 @@ public class test {
 
         System.out.println( xiguaAddress.getRoomIdByPersonAddress("https://v.douyin.com/i2jDxEfu/"));
 
-        System.out.println( xiguaAddress.getVideoName("https://v.douyin.com/iYKGpvAT/"));
+        System.out.println( xiguaAddress.getNickNameByPersonAddress("https://v.douyin.com/i2jDxEfu/"));
 
     }
 

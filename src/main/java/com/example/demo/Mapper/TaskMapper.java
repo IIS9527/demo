@@ -30,17 +30,20 @@ public interface TaskMapper {
 
      List<TaskData>  getTaskList(@Param("pageSize")Integer pageSize,@Param("size") Integer size );
 
-     @Insert({"insert into taskTable (time, roomAddress, duration, videoName, number, roomId, state, integral, realDieTime,numberStatic,beginTimeFrom,beginTimeTo,creatIntegral)" +
+     @Insert({"insert into taskTable (time, roomAddress, duration, videoName, number, roomId, state, integral, realDieTime," +
+             "numberStatic,beginTimeFrom,beginTimeTo,creatIntegral,personAddress)" +
              "values (#{taskData.time},#{taskData.roomAddress},#{taskData.duration},#{taskData.videoName},#{taskData.number}," +
              "#{taskData.roomId},#{taskData.state},#{taskData.integral},#{taskData.realDieTime},#{taskData.numberStatic}," +
-             "#{taskData.beginTimeFrom},#{taskData.beginTimeTo},#{taskData.creatIntegral})"})
+             "#{taskData.beginTimeFrom},#{taskData.beginTimeTo},#{taskData.creatIntegral},#{taskData.personAddress})"})
     boolean addTask(@Param("taskData") TaskData taskData);
 
 
     Boolean deleteHistoryTasks(@Param("taskDataList") List<TaskData> taskDataList);
 
-    @Insert({"insert into temptasktable (id,time, roomAddress, duration, videoName, number, roomId, state, integral, realDieTime,numberStatic,beginTimeFrom,beginTimeTo)" +
-            "values (#{taskData.id},#{taskData.time},#{taskData.roomAddress},#{taskData.duration},#{taskData.videoName},#{taskData.number},#{taskData.roomId},#{taskData.state},#{taskData.integral},#{taskData.realDieTime},#{taskData.numberStatic},#{taskData.beginTimeFrom},#{taskData.beginTimeTo})"})
+    @Insert({"insert into temptasktable (id,time, roomAddress, duration, videoName, number, roomId, state, integral, realDieTime,numberStatic,beginTimeFrom,beginTimeTo,personAddress)" +
+            "values (#{taskData.id},#{taskData.time},#{taskData.roomAddress},#{taskData.duration},#{taskData.videoName}," +
+            "#{taskData.number},#{taskData.roomId},#{taskData.state},#{taskData.integral},#{taskData.realDieTime}," +
+            "#{taskData.numberStatic},#{taskData.beginTimeFrom},#{taskData.beginTimeTo},#{taskData.personAddress})"})
     boolean addTempTask(@Param("taskData") TaskData taskData);
 
 

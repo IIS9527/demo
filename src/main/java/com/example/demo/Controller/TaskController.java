@@ -398,78 +398,54 @@ boolean lock = false;
         if (taskData.integral ==null || taskData.integral <= 0){
             return AjaxResult.fail(404,"请输入任务每分钟积分");
         }
-
-        if (StrUtil.isEmptyIfStr(taskData.getRoomId()) || StrUtil.isEmptyIfStr(taskData.getVideoName())){
-
-            if (taskData.getRoomAddress() !=null && !taskData.getRoomAddress().isEmpty()){
-                //解析直播间roomId
-                String roomId = xiguaAddress.getRoomId(taskData.roomAddress);
-
-                if (roomId.equals("false")){
-                    return AjaxResult.fail(404,"地址解析错误");
-                }
-
-                //获取直播人名
-                String videoName = xiguaAddress.getVideoName(taskData.roomAddress);
-                if (videoName.equals("false")){
-                    return AjaxResult.fail(404,"直播人地址解析错误");
-                }
-
-                taskData.setRoomId(roomId);
-                taskData.setVideoName(videoName);
+        if (DateUtil.compare( DateUtil.parse(taskData.beginTimeFrom),DateUtil.date())>0){
+            // 加入临时任务表
+            log.info("addTempTask {}",taskData);
+            if ( taskMapper.addTempTask(taskData)){
+                return  AjaxResult.success();
             }
-            else if (taskData.getPersonAddress() !=null && !taskData.getPersonAddress().isEmpty()){
-                //解析直播间roomId
-                String roomId = xiguaAddress.getRoomIdByPersonAddress(taskData.getPersonAddress());
-
-                if (roomId == null){
-                    return AjaxResult.fail(404,"地址解析错误");
-                }
-
-                //获取直播人名
-                String videoName = xiguaAddress.getNickNameByPersonAddress(taskData.getPersonAddress());
-                if (videoName == null){
-                    return AjaxResult.fail(404,"直播人地址解析错误");
-                }
-
-                taskData.setRoomId(roomId);
-                taskData.setVideoName(videoName);
-
-
-
+            else {
+                return AjaxResult.fail(-1,"加入任务出错");
             }
-
-
-
-
-
         }
 
-       if (!NumberUtil.isNumber(taskData.getRoomId())){
-           return AjaxResult.fail(404,"RoomId 出错");
-       }
+        if (taskData.getRoomAddress() !=null && !taskData.getRoomAddress().isEmpty()){
+            //解析直播间roomId
+            String roomId = xiguaAddress.getRoomId(taskData.roomAddress);
+            if (roomId.equals("false")){
+                return AjaxResult.fail(404,"地址解析错误");
+            }
+            //获取直播人名
+            String videoName = xiguaAddress.getVideoName(taskData.roomAddress);
+            if (videoName.equals("false")){
+                return AjaxResult.fail(404,"直播人地址解析错误");
+            }
+            taskData.setRoomId(roomId);
+            taskData.setVideoName(videoName);
+        }
+        if (taskData.getPersonAddress() !=null && !taskData.getPersonAddress().isEmpty()){
+            //解析直播间roomId
+            String roomId = xiguaAddress.getRoomIdByPersonAddress(taskData.getPersonAddress());
+            if (roomId == null){
+                return AjaxResult.fail(404,"地址解析错误");
+            }
+            //获取直播人名
+            String videoName = xiguaAddress.getNickNameByPersonAddress(taskData.getPersonAddress());
+            if (videoName == null){
+                return AjaxResult.fail(404,"直播人地址解析错误");
+            }
+            taskData.setRoomId(roomId);
+            taskData.setVideoName(videoName);
+        }
 
+        if (StrUtil.isEmptyIfStr(taskData.getRoomId()) || StrUtil.isEmptyIfStr(taskData.getVideoName()) || !NumberUtil.isNumber(taskData.getRoomId())){
+            return AjaxResult.fail(404,"RoomId 出错");
+        }
 
-     /*
-     *
-     * 两种情况
-     * */
-       if (DateUtil.compare( DateUtil.parse(taskData.beginTimeFrom),DateUtil.date())<1){
+        taskData.setBeginTimeFrom(DateUtil.date(Calendar.getInstance()).toString());
+        taskData.setId(IdUtil.randomUUID());
+        taskModel.setTask(taskData);
 
-           taskData.setBeginTimeFrom(DateUtil.date(Calendar.getInstance()).toString());
-           taskData.setId(IdUtil.randomUUID());
-           taskModel.setTask(taskData);
-
-       }
-       else{ // 加入临时任务表
-             log.info("addTempTask {}",taskData);
-         if ( taskMapper.addTempTask(taskData)){
-          return  AjaxResult.success();
-         }
-         else {
-             return AjaxResult.fail(-1,"加入任务出错");
-         }
-       }
          return  AjaxResult.success();
     }
 

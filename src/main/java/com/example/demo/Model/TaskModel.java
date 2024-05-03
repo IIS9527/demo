@@ -192,16 +192,17 @@ List<DeviceData> deviceDataListGlobal = GlobalVariablesSingleton.getInstance().g
      */
     public Boolean setTask(TaskData taskData){
 
-
         Long timeNow =System.currentTimeMillis();
         //初始化 当缓存用户列表为0
         if (userListGlobal.size()== 0){
-
             taskDataListGlobal.add(taskData);
-
             return  true;
-
         }
+
+
+
+
+
 
 
         //开始执行分配任务表

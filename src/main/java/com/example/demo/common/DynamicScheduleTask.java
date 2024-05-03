@@ -6,8 +6,11 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import com.example.demo.Address.XiguaAddress;
+import com.example.demo.Config.AjaxResult;
 import com.example.demo.Data.DeviceData;
 import com.example.demo.Data.GlobalVariablesSingleton;
 import com.example.demo.Data.TaskData;
@@ -24,10 +27,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Configuration      //1.主要用于标记配置类，兼备Component的效果。
@@ -46,6 +46,8 @@ public class DynamicScheduleTask  {
     UserMapper userMapper;
     @Autowired
     TaskMapper taskMapper;
+    @Autowired
+    XiguaAddress xiguaAddress;
 
     @Scheduled(cron ="*/20 * * * * ?")
     @Transactional
@@ -139,9 +141,47 @@ public class DynamicScheduleTask  {
             if (DateUtil.compare(DateUtil.parse(tempTaskDataList.get(i).getBeginTimeFrom()),DateUtil.date())<1){
                 log.info("creat a task now");
                 //先用temp表id删除指定缓存任务
-                taskMapper.deleteTempTask(tempTaskDataList.get(i));
-//                //再注入新的uid
-//                tempTaskDataList.get(i).setId(IdUtil.randomUUID());
+              if (!taskMapper.deleteTempTask(tempTaskDataList.get(i))){
+                  log.error("delete temp false ");
+                  continue;
+              }
+                //判断roomid和直播名称
+                if (StrUtil.isEmptyIfStr(tempTaskDataList.get(i).getRoomId()) || StrUtil.isEmptyIfStr(tempTaskDataList.get(i).getVideoName())){
+                    if (tempTaskDataList.get(i).getRoomAddress() !=null && !tempTaskDataList.get(i).getRoomAddress().isEmpty()){
+                        //解析直播间roomId
+                        String roomId = xiguaAddress.getRoomId(tempTaskDataList.get(i).roomAddress);
+                        if (roomId.equals("false")){
+                            log.error("roomId false");
+                            continue;
+                        }
+                        //获取直播人名
+                        String videoName = xiguaAddress.getVideoName(tempTaskDataList.get(i).roomAddress);
+                        if (videoName.equals("false")){
+                            log.error("videoName false");
+                            continue;
+                        }
+                        tempTaskDataList.get(i).setRoomId(roomId);
+                        tempTaskDataList.get(i).setVideoName(videoName);
+                    }
+                    if (tempTaskDataList.get(i).getPersonAddress() !=null && !tempTaskDataList.get(i).getPersonAddress().isEmpty()){
+                        //解析直播间roomId
+                        String roomId = xiguaAddress.getRoomIdByPersonAddress(tempTaskDataList.get(i).getPersonAddress());
+                        if (roomId == null){
+                            log.error("roomId By person address false");
+                            continue;
+                        }
+                        //获取直播人名
+                        String videoName = xiguaAddress.getNickNameByPersonAddress(tempTaskDataList.get(i).getPersonAddress());
+                        if (videoName == null){
+                            log.error("videoName By person address false");
+                            continue;
+                        }
+                        tempTaskDataList.get(i).setRoomId(roomId);
+                        tempTaskDataList.get(i).setVideoName(videoName);
+                    }
+                }
+                tempTaskDataList.get(i).setBeginTimeFrom(DateUtil.date(Calendar.getInstance()).toString());
+                tempTaskDataList.get(i).setId(IdUtil.randomUUID());
                 taskModel.setTask(tempTaskDataList.get(i));
             }
         }

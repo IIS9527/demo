@@ -228,13 +228,14 @@ public class XiguaAddress {
         Document document1 = null;
         try {
             document1 = Jsoup.connect(personAddress).headers(userAgent1).followRedirects(false).timeout(2500).get();
+//            log.info(document1.outerHtml());
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
         if (document1 == null){return null; }
         UrlBuilder urlBuilder =  UrlBuilder.of(document1.getElementsByTag("a").attr("href"));
-        String sec_uid= urlBuilder.getQuery().get("sec_user_id").toString();
+        String sec_uid= urlBuilder.getQuery().get("sec_uid").toString();
 
         Map<String,String> userAgent =  new HashMap<String,String>();
         userAgent.put("Host","weixin.qq.com");
@@ -302,7 +303,7 @@ public class XiguaAddress {
         if (document == null){return null; }
         UrlBuilder urlBuilder =  UrlBuilder.of(document.getElementsByTag("a").attr("href"));
 
-        String sec_uid= urlBuilder.getQuery().get("sec_user_id").toString();
+        String sec_uid= urlBuilder.getQuery().get("sec_uid").toString();
         try {
             Document document1 = Jsoup.connect("https://www.iesdouyin.com/web/api/v2/user/info/?sec_uid="+sec_uid+"&from_ssr=1").headers(userAgent).followRedirects(false).ignoreContentType(true).timeout(2500).get();
 //            System.out.println(document1.getElementsByTag("body"));
