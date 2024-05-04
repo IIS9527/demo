@@ -16,8 +16,8 @@ public interface IntegralMapper {
 
 
 
-    @Insert({"insert into exchangeIntegral (exchangeTime, integral, cardNo, realName, qrUrl)" +
-            "values (now(), #{ei.integral}, #{ei.cardNo}, #{ei.realName}, #{ei.qrUrl})"})
+    @Insert({"insert into exchangeIntegral (exchangeTime, integral, cardNo, realName, qrUrl,qrUrlZFB,qrUrlOY)" +
+            "values (now(), #{ei.integral}, #{ei.cardNo}, #{ei.realName}, #{ei.qrUrl},#{ei.qrUrlZFB},#{ei.qrUrlOY})"})
     Boolean addExchangeIntegral(@Param("ei") ExchangeIntegral exchangeIntegral);
 
 

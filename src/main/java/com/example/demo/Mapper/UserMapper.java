@@ -12,7 +12,7 @@ import java.util.List;
 public interface UserMapper {
 
     @Select({"select cardNo,  totalIntegral, email, freezeIntegral, realName, tempIntegral, redeemedIntegral," +
-            "                  qrUrl, availableIntegral, permissions,state from user where cardNo=#{cardNo}"})
+            "                  qrUrl,qrUrlZFB,qrUrlOY ,availableIntegral, permissions,state  from user where cardNo=#{cardNo}"})
     User selectMyInfoByCardNo(@Param("cardNo") String cardNo);
 
     @Select({"select cardNo,  totalIntegral, email, freezeIntegral, realName, tempIntegral, redeemedIntegral," +

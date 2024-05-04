@@ -21,6 +21,8 @@ public class User implements Serializable {
     private Integer state;
     private String email;
     private String qrUrl;
+    private String qrUrlZFB;
+    private String qrUrlOY;
     private List<DeviceData> devices;
     private Long   totalIntegral;
     private Long   freezeIntegral;

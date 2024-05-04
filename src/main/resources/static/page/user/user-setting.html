@@ -49,6 +49,33 @@
                     </div>
              </div>
             </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">zfb二维码</label>
+                <div  class="layui-input-inline layui-input-wrap">
+                    <button  type="button" class="layui-btn" id="ID-upload-demo-btn-zfb">
+                        <i class="layui-icon layui-icon-upload"></i>zfb二维码上传
+                    </button>
+                    <div class="layui-input-inline layui-input-wrap" style="width: 132px;">
+                        <div class="layui-upload-list">
+                            <img class="layui-upload-img" id="ID-upload-demo-img-zfb" style="width: 100%; height: 92px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">oy二维码</label>
+                <div  class="layui-input-inline layui-input-wrap">
+                    <button  type="button" class="layui-btn" id="ID-upload-demo-btn-oy">
+                        <i class="layui-icon layui-icon-upload"></i>oy二维码上传
+                    </button>
+                    <div class="layui-input-inline layui-input-wrap" style="width: 132px;">
+                        <div class="layui-upload-list">
+                            <img class="layui-upload-img" id="ID-upload-demo-img-oy" style="width: 100%; height: 92px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 <!--            <div class="layui-form-item">-->
 <!--                <label class="layui-form-label">邮箱</label>-->
 <!--                <div class="layui-input-block">-->
@@ -76,19 +103,14 @@
         /**
          * 初始化表单，要加上，不然刷新部分组件可能会不加载
          */
-        // form.render({
-        // })
-        // form.val("saveBtn",{
-        //     "email":"5296@qq.com"
-        //
-        // })
+
 
 
 
         // 单图片上传
         var uploadInst = upload.render({
             elem: '#ID-upload-demo-btn',
-            url: '/user/qrUpload', // 实际使用时改成您自己的上传接口即可。
+            url: '/user/qrUpload?type=1', // 实际使用时改成您自己的上传接口即可。
             before: function(obj){
                 // 预读本地文件示例，不支持ie8
                 obj.preview(function(index, file, result){
@@ -112,7 +134,64 @@
 
 
         });
-           $('#saveBtn').click(function (){
+        // 单图片上传
+        var uploadInstZFB = upload.render({
+            elem: '#ID-upload-demo-btn-zfb',
+            url: '/user/qrUpload?type=2', // 实际使用时改成您自己的上传接口即可。
+            before: function(obj){
+                // 预读本地文件示例，不支持ie8
+                obj.preview(function(index, file, result){
+                    $('#ID-upload-demo-img-zfb').attr('src', result); // 图片链接（base64）
+                });
+
+                var msg =   layer.msg('上传中', {icon: 16, time: 12});
+
+            },
+            done: function(res){
+                // 若上传失败
+                if(res.code < 0){
+                    return layer.msg('上传失败');
+                }
+
+                // 上传成功的一些操作
+                // …
+                $('#ID-upload-demo-text').html(''); // 置空上传失败的状态
+
+            },
+
+
+        });
+        // 单图片上传
+        var uploadInstOY = upload.render({
+            elem: '#ID-upload-demo-btn-oy',
+            url: '/user/qrUpload?type=3', // 实际使用时改成您自己的上传接口即可。
+            before: function(obj){
+                // 预读本地文件示例，不支持ie8
+                obj.preview(function(index, file, result){
+                    $('#ID-upload-demo-img-oy').attr('src', result); // 图片链接（base64）
+                });
+
+                var msg =   layer.msg('上传中', {icon: 16, time: 12});
+
+            },
+            done: function(res){
+                // 若上传失败
+                if(res.code < 0){
+                    return layer.msg('上传失败');
+                }
+
+                // 上传成功的一些操作
+                // …
+                $('#ID-upload-demo-text').html(''); // 置空上传失败的状态
+
+            },
+
+
+        });
+
+
+
+        $('#saveBtn').click(function (){
 
                $.ajax({
                    url:"/user/setMyInfo",
@@ -156,6 +235,8 @@
                         $('#availableIntegral').html(d.availableIntegral)
                         $('#email').val(d.email)
                         $('#ID-upload-demo-img').attr('src', d.qrUrl);
+                        $('#ID-upload-demo-img-zfb').attr('src', d.qrUrlZFB);
+                        $('#ID-upload-demo-img-oy').attr('src', d.qrUrlOY);
                     }
                     else {
                         layer.msg(data.data, {icon: 2});
@@ -171,16 +252,6 @@
 
 
 
-        //监听提交
-        // form.on('submit(saveBtn)', function (data) {
-        //     var index = layer.alert(JSON.stringify(data.field), {
-        //         title: '最终的提交信息'
-        //     }, function () {
-        //         layer.close(index);
-        //         miniPage.hashHome();
-        //     });
-        //     return false;
-        // });
 
     });
 </script>

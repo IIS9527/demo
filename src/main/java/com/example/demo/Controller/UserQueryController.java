@@ -168,7 +168,7 @@ public class UserQueryController {
     @Value("${server.port}")
     String  port;
     @PostMapping("/qrUpload")
-    public AjaxResult qrUpload(@RequestParam(value = "file") MultipartFile multipartFile, HttpServletRequest request) throws IOException {
+    public AjaxResult qrUpload(@RequestParam(value = "file") MultipartFile multipartFile,@PathParam("type") Integer type, HttpServletRequest request) throws IOException {
 
         User user = (User) request.getSession().getAttribute(ApplicationVariable.SESSION_KEY_USERINFO);
         //上传文件 校验  ？？
@@ -180,7 +180,16 @@ public class UserQueryController {
                 return AjaxResult.fail(404, "上传文件错误");
             }
 
-            user.setQrUrl( name);
+            if (type.equals(1)){
+                user.setQrUrl( name);
+            }
+            else if (type.equals(2)){
+                user.setQrUrlZFB(name);
+            }
+            else if (type.equals(3)){
+                user.setQrUrlOY(name);
+            }
+
             userMapper.setMyInfo(user);
             log.info(name);
             return AjaxResult.success(name);

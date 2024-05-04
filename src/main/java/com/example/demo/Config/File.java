@@ -68,12 +68,6 @@ public class File {
 
 
 
-
-
-
-
-
-
         String originalFilename = file.getOriginalFilename(); //获取文件名
         String type = FileUtil.extName(originalFilename);//
         long size = file.getSize();//大小

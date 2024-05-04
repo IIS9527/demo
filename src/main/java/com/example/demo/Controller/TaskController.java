@@ -434,8 +434,12 @@ boolean lock = false;
             if (videoName == null){
                 return AjaxResult.fail(404,"直播人地址解析错误");
             }
+
+            String xiguaName = xiguaAddress.getXiGuaName(roomId);
+
             taskData.setRoomId(roomId);
             taskData.setVideoName(videoName);
+            taskData.setVideoNameXiGua(xiguaName);
         }
 
         if (StrUtil.isEmptyIfStr(taskData.getRoomId()) || StrUtil.isEmptyIfStr(taskData.getVideoName()) || !NumberUtil.isNumber(taskData.getRoomId())){

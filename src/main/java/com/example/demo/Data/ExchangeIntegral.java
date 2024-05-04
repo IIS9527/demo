@@ -12,6 +12,8 @@ public class ExchangeIntegral {
     private  String cardNo;
     private  String realName;
     private  String qrUrl;
+    private  String qrUrlZFB;
+    private  String qrUrlOY;
     private  String allowTime;
     private  Integer allowState;
 

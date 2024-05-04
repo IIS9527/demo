@@ -22,6 +22,11 @@ import lombok.val;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+import org.openqa.selenium.By;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,6 +41,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
@@ -318,7 +324,40 @@ public class XiguaAddress {
 
     }
 
+    public String getXiGuaName(String roomid) {
 
+        ChromeOptions options =new ChromeOptions();
+
+        // 设置允许弹框
+        options.addArguments("disable-infobars","disable-web-security");
+        // 设置无gui 开发时还是不要加，可以看到浏览器效果
+        options.addArguments("--headless");
+        String driverPath =  "C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\Application\\chromedriver.exe";
+//        String driverPath =  "C:\\Program Files\\Google\\Chrome\\Application\\chromedriver.exe";
+
+
+        System.setProperty("webdriver.chrome.driver", driverPath);
+
+        HashMap<String,String>  mobileEmulation = new HashMap<String,String>();
+        mobileEmulation.put("deviceName","iPhone XR");
+        options.setExperimentalOption("mobileEmulation", mobileEmulation);
+
+        ChromeDriver driver=  new ChromeDriver(options);
+
+        driver.get("https://webcast-open.douyin.com/open/webcast/reflow/?webcast_app_id=247160&room_id="+roomid);
+
+
+        new WebDriverWait(driver, Duration.ofMinutes(1)).until(ExpectedConditions.presenceOfElementLocated(By.className("saas-reflow-room-anchor-name")));
+
+        String   xiguaName =  driver.findElement(By.className("saas-reflow-room-anchor-name")).getText();
+
+        log.info("xiguaName find is :{}", xiguaName);
+
+        driver.close();
+
+        return xiguaName;
+
+    }
 
 
 }

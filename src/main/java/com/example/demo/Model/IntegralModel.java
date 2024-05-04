@@ -32,7 +32,8 @@ public class IntegralModel {
         ExchangeIntegral exchangeIntegral =new ExchangeIntegral();
         exchangeIntegral.setCardNo(user.getCardNo());
         exchangeIntegral.setQrUrl(user.getQrUrl());
-
+        exchangeIntegral.setQrUrlZFB(user.getQrUrlZFB());
+        exchangeIntegral.setQrUrlOY(user.getQrUrlOY());
         exchangeIntegral.setIntegral(integral);
         exchangeIntegral.setRealName(user.getRealName());
 
@@ -40,7 +41,6 @@ public class IntegralModel {
 
         //数据库减操作  减去用户可用积分 操作失败就回滚
         userMapper.exchangeIntegral(user.getCardNo(),integral);
-
 
        return  true;
 
