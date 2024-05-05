@@ -219,7 +219,7 @@ public class AdminController {
             log.info("userTempIntegral:{},{}",userListGlobe.get(i).getTempIntegral(),todayTotalIntegral);
         }
           todayTotalIntegral= todayTotalIntegral+  userMapper.selectTodayAllIntegral();
-            log.info("AllUserTempIntegral:{}", userMapper.selectTodayAllIntegral());
+            log.info("AllUserTempIntegral:{}", todayTotalIntegral);
         //今日待审核和已审核 积分统计
         HashMap<String, BigDecimal> hashMap = integralMapper.selectTodayExchangeAndAlreadExchangeIntegral();
          JSONObject jsonObject =   new JSONObject();

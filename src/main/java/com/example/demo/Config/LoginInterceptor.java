@@ -21,7 +21,7 @@ public class LoginInterceptor implements HandlerInterceptor {
         //判断用户登录
         HttpSession session = request.getSession(false);
 
-        log.info("LoginInterceptor start");
+//        log.info("LoginInterceptor start");
 
         //如果没有拦截 放行
 
