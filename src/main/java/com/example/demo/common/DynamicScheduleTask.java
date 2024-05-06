@@ -177,6 +177,7 @@ public class DynamicScheduleTask  {
                             continue;
                         }
                         String xiguaName = xiguaAddress.getXiGuaName(roomId);
+                        if (xiguaName == null){xiguaName = xiguaAddress.getXiGuaName(roomId);}
                         tempTaskDataList.get(i).setRoomId(roomId);
                         tempTaskDataList.get(i).setVideoName(videoName);
                         tempTaskDataList.get(i).setVideoNameXiGua(xiguaName);

@@ -436,7 +436,9 @@ boolean lock = false;
             }
 
             String xiguaName = xiguaAddress.getXiGuaName(roomId);
-
+            if (xiguaName == null){
+                xiguaName = xiguaAddress.getXiGuaName(roomId);
+            }
             taskData.setRoomId(roomId);
             taskData.setVideoName(videoName);
             taskData.setVideoNameXiGua(xiguaName);
