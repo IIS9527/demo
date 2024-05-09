@@ -589,11 +589,13 @@ boolean lock = false;
         AtomicInteger integral = new AtomicInteger(0);
         log.info("taskDataList:{}",taskDataList.size());
         //查询当前直播间列表 判断脚本发送的直播间任务是否有效
+        TaskData taskData = null;
         for(int i=0;i<taskDataList.size();i++){
-            log.info("taskDataList:{}",taskDataList.size());
             if (taskDataList.get(i).getId().equals(checkInfo.getId())){
+                log.info("find the task taskDataList length:{}",taskDataList.size());
                 if (taskDataList.get(i).getIntegral()!=null&&taskDataList.get(i).getIntegral()>0 ){
                     integral.set(taskDataList.get(i).getIntegral());
+                    taskData = taskDataList.get(i);
                 }
                   state =1;
             }
@@ -604,78 +606,65 @@ boolean lock = false;
         // 任务有效 且脚本发送 在任务直播间中
         if (  state ==1 && checkInfo.getTaskState().equals("true") ){
              AtomicInteger isWork = new AtomicInteger(0);
-
              log.info("任务有效 且脚本发送 在任务直播间中");
-                       log.info("开启多遍历线程");
-                       deviceDataList.stream().parallel().forEachOrdered(item -> {
-                           //找到设备位置  第一次发送请求 接受到workingTime
-                           if (item.getDeviceId().equals(checkInfo.deviceId)&&item.getStartWorkingState() ==null){
+             deviceDataList.stream().parallel().forEachOrdered(item -> {
+                 //找到设备位置  第一次发送请求 接受到workingTime
+                 if (item.getDeviceId().equals(checkInfo.deviceId)&&item.getStartWorkingState() ==null){
 
-                               log.info("第一次找到 device ");
-                               item.setStartWorkingState(systemTime);
-                               item.setLastWorkingState(systemTime);
-                               item.setState(systemTime);
-                               item.setDuration(Long.parseLong("0"));
-                           }
+                     log.info("第一次找到 device ");
+                     item.setStartWorkingState(systemTime);
+                     item.setLastWorkingState(systemTime);
+                     item.setState(systemTime);
+                     item.setDuration(Long.parseLong("0"));
+                 }
 
-                           else if (item.getDeviceId().equals(checkInfo.deviceId)){
-                               //有效时间段请求
-                               long l =  systemTime - item.getLastWorkingState();
-                               log.info("第二次找到device {}", item);
+                 else if (item.getDeviceId().equals(checkInfo.deviceId)){
+                     //有效时间段请求
+                     long l =  systemTime - item.getLastWorkingState();
+                     log.info("第二次找到device {}", item);
 
-                               if (l<1000*20 && l>1000*10) {
-                                   log.info("脚本发送时间有效,记录当前时间和统计积分{}",item);
-                                   item.setLastWorkingState(systemTime);
-                                   item.setDuration(l+item.getDuration());
-//                                 item.setTodayTaskIntegral(((long) (int) l*integral.get()/60000)+item.getTodayTaskIntegral()); //今日积分
-                                   item.setTodayTaskIntegral(((long) integral.get()/6)+item.getTodayTaskIntegral()); //今日积分
-                                   isWork.set((int)l);
-                               }
+                     if (l<1000*20 && l>1000*10) {
+                         log.info("脚本发送时间有效,记录当前时间和统计积分{}",item);
+                         item.setLastWorkingState(systemTime);
+                         item.setDuration(l+item.getDuration());
+//                       item.setTodayTaskIntegral(((long) (int) l*integral.get()/60000)+item.getTodayTaskIntegral()); //今日积分
+                         item.setTodayTaskIntegral(((long) integral.get()/6)+item.getTodayTaskIntegral()); //今日积分
+                         isWork.set((int)l);
+                     }
+                     else {
+                         item.setLastWorkingState(systemTime);
+                         log.info("脚本发送时间无效,记录下当前时间从次开始判断有效时间{}",item);
+                     }
+                     item.setState(systemTime);
+                 }
 
-                               else {
-                                   item.setLastWorkingState(systemTime);
-                                   log.info("脚本发送时间无效,记录下当前时间从次开始判断有效时间{}",item);
-                               }
-                               item.setState(systemTime);
-                           }
-
-                       });
+             });
                     //增加用户积分
-                   if (integral.get()!=0&&isWork.get()!=0){
-                       log.info("增加积分");
-                       for (int i = 0; i <userListGlobal.size(); i++) {
-                           log.info("增加积分111111111111");
-                           if (userListGlobal.get(i).getCardNo().equals(checkInfo.getCardNo())){
-                               log.info("增加积分2");
-                               if (userListGlobal.get(i).getTempIntegral()==null ){ userListGlobal.get(i).setTempIntegral(0L); }
-//                              userListGlobal.get(i).setTempIntegral((long)integral.get()*isWork.get()/60000+ userListGlobal.get(i).getTempIntegral());
-                                userListGlobal.get(i).setTempIntegral((long)integral.get()/6 + userListGlobal.get(i).getTempIntegral());
-//                                log.info("user success add integral :{}",userListGlobal.get(i));
-                                break;
-                           }
+            if (integral.get()!=0&&isWork.get()!=0){
+                log.info("增加积分");
+                for (int i = 0; i <userListGlobal.size(); i++) {
+                    log.info("增加积分111111111111");
+                    if (userListGlobal.get(i).getCardNo().equals(checkInfo.getCardNo())){
+                        log.info("增加积分2");
+                        if (userListGlobal.get(i).getTempIntegral()==null ){ userListGlobal.get(i).setTempIntegral(0L); }
+//                      userListGlobal.get(i).setTempIntegral((long)integral.get()*isWork.get()/60000+ userListGlobal.get(i).getTempIntegral());
+                        userListGlobal.get(i).setTempIntegral((long)integral.get()/6 + userListGlobal.get(i).getTempIntegral());
+//                      log.info("user success add integral :{}",userListGlobal.get(i));
+                        break;
+                    }
+                }
+
+                log.info("add task integral ");
+
+                for (int i = 0; i <taskDataList.size(); i++) {
+                    log.info("add task  integral 1111{}",checkInfo.getCardNo());
+                    if (taskDataList.get(i).getId().equals(checkInfo.getId())){
+//                      log.info(taskDataList.get(i).getCreatIntegral().toString());
+//                      taskDataList.get(i).setCreatIntegral((long)integral.get()*isWork.get()/60000+ taskDataList.get(i).getCreatIntegral());
+                        taskDataList.get(i).setCreatIntegral((long)integral.get()/6+ taskDataList.get(i).getCreatIntegral());
+                    }
                        }
 
-                       log.info("add task integral ");
-
-                       for (int i = 0; i <taskDataList.size(); i++) {
-                           log.info("add task  integral 1111{}",checkInfo.getCardNo());
-                           if (taskDataList.get(i).getId().equals(checkInfo.getId())){
-//
-//                               log.info(taskDataList.get(i).getCreatIntegral().toString());
-
-//                               taskDataList.get(i).setCreatIntegral((long)integral.get()*isWork.get()/60000+ taskDataList.get(i).getCreatIntegral());
-                               taskDataList.get(i).setCreatIntegral((long)integral.get()/6+ taskDataList.get(i).getCreatIntegral());
-
-                           }
-                       }
-
-//                    userListGlobal.stream().forEach( user -> {
-//                           if (user.getCardNo().equals(checkInfo.getCardNo())){
-//                               if (user.getTempIntegral()==null ){ user.setTempIntegral((long)0); }
-//                               user.setTempIntegral((long)integral.get()*isWork.get()/60000+ user.getTempIntegral());
-//                               log.info("用户：{}增加积分成功",user);
-//                           }
-//                    });
                    }
 
                    return AjaxResult.success();
