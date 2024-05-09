@@ -208,7 +208,7 @@ public class AdminController {
             if (deviceDataListGlobe.get(i).getState()+1000*30 > currentTime && deviceDataListGlobe.get(i).getState().equals(deviceDataListGlobe.get(i).getLastWorkingState() ) ){
                 workingDevices++;
             }
-            else if (deviceDataListGlobe.get(i).getState()+1000*30 > currentTime){
+            else if (deviceDataListGlobe.get(i).getState()+1000*60 > currentTime){
                 waitDevices++;
             }
         }

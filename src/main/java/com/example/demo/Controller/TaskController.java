@@ -735,9 +735,10 @@ boolean lock = false;
            state = 0;
 
         for (int i = 0; i < deviceDataList.size(); i++) {
-            log.info("deviceIdL:{},deviceId:{}",deviceDataList.get(i).getDeviceId(),deviceId);
             if (deviceDataList.get(i).getDeviceId().equals(deviceId)){
+                log.info("screenUpload find deviceId:{}",deviceDataList.get(i).getDeviceId());
                 state = 1;
+                break;
             }
         }
 
@@ -759,6 +760,7 @@ boolean lock = false;
             log.info(name);
             return AjaxResult.success();
         } catch (Exception e) {
+
             e.printStackTrace();
         }
 
