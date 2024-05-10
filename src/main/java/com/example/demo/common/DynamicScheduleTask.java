@@ -172,11 +172,14 @@ public class DynamicScheduleTask  {
                             log.error("videoName By person address false");
                             continue;
                         }
-                        String xiguaName = xiguaAddress.getXiGuaName(roomId);
-                        if (xiguaName == null){xiguaName = xiguaAddress.getXiGuaName(roomId);}
                         tempTaskDataList.get(i).setRoomId(roomId);
                         tempTaskDataList.get(i).setVideoName(videoName);
-                        tempTaskDataList.get(i).setVideoNameXiGua(xiguaName);
+                        String xiguaName = xiguaAddress.getXiGuaName(roomId);
+                        if (xiguaName == null){xiguaName = xiguaAddress.getXiGuaName(roomId);}
+                        if (xiguaName != null){
+                            tempTaskDataList.get(i).setVideoName(xiguaName);
+                            tempTaskDataList.get(i).setVideoNameXiGua(xiguaName);
+                        }
                     }
                 }
                 tempTaskDataList.get(i).setBeginTimeFrom(DateUtil.date(Calendar.getInstance()).toString());
