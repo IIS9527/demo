@@ -349,7 +349,7 @@ public class XiguaAddress {
 
         new WebDriverWait(driver, Duration.ofMinutes(1)).until(ExpectedConditions.presenceOfElementLocated(By.className("saas-reflow-room-anchor-name")));
 
-        String   xiguaName =  driver.findElement(By.className("saas-reflow-room-anchor-name")).getText();
+        String   xiguaName =  driver.findElement(By.className("saas-reflow-room-anchor-name")).getAttribute("textContent");
 
         log.info("xiguaName find is :{}", xiguaName);
 

@@ -28,14 +28,16 @@ public class test {
     XiguaAddress xiguaAddress;
     @Test
     void  test1(){
+//        System.out.println(11/6);
 
-        System.out.println(DateUtil.date());
 
-
-//        System.out.println( xiguaAddress.getRoomIdByPersonAddress("https://v.douyin.com/i2jDxEfu/"));
+//        System.out.println(DateUtil.date());
 //
-         System.out.println( xiguaAddress.getXiGuaName("7363084478077586213"));
-
+//
+//        System.out.println( xiguaAddress.getRoomIdByPersonAddress("https://v.douyin.com/i2jDxEfu/"));
+////
+//         System.out.println( xiguaAddress.getXiGuaName("7368722113529694987"));
+//
 
 
     }

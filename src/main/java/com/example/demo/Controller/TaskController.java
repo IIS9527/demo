@@ -562,9 +562,7 @@ boolean lock = false;
 
         //只有在脚本接收任务后才会请求该接口 每十秒记录一次任务状态
         String md5 = SecureUtil.md5(checkInfo.getCardNo()+checkInfo.getDeviceId()+checkInfo.getRoomId()+checkInfo.getTime()+checkInfo.getVideoDieOut()+checkInfo.getTaskState()+checkInfo.getId()+"sb1314520sbNB$");
-        if (!md5.equals(mid)){
-            return  AjaxResult.fail(-1,"?????你在做什么,唱歌");
-        }
+        if (!md5.equals(mid)){return  AjaxResult.fail(-1,"?????你在做什么,唱歌");}
         if (!StrUtil.isEmptyIfStr(checkInfo.getVideoDieOut())&&checkInfo.getVideoDieOut().equals("true")){//脚本发现直播间任务结束
             log.info("checkState:{}",checkInfo.getVideoDieOut());
             for (int i = 0; i < taskDataList.size(); i++) {
