@@ -4,6 +4,7 @@ package com.example.demo.Model;
 import com.example.demo.Data.ExchangeIntegral;
 import com.example.demo.Data.User;
 import com.example.demo.Mapper.IntegralMapper;
+import com.example.demo.Mapper.TaskMapper;
 import com.example.demo.Mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,9 @@ public class IntegralModel {
 
     @Autowired
     UserMapper userMapper;
+    @Autowired
+    private TaskMapper taskMapper;
+
     /*
     *
     * 用户积分申请
@@ -98,5 +102,9 @@ public class IntegralModel {
     public boolean changePassword(String cardNo, String password) {
         return userMapper.changePassword(cardNo,password);
 
+    }
+
+    public Integer getOneDayTotalIntegral(String searchDate) {
+        return taskMapper.getOneDayTotalIntegral(searchDate);
     }
 }

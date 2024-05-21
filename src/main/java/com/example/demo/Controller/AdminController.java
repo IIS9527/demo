@@ -355,6 +355,14 @@ public class AdminController {
 
     }
 
+    @Auth(user = "1000")
+    @GetMapping("/getOneDayTotalIntegral")
+    public AjaxResult getOneDayTotalIntegral(@PathParam(value = "searchDate") String searchDate){
+        return AjaxResult.success(integralModel.getOneDayTotalIntegral(searchDate));
+    }
+
+
+
 }
 
 
