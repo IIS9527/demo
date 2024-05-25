@@ -228,10 +228,6 @@ boolean lock = false;
             deviceDataList.add(deviceData);
         }
 
-
-
-
-
         // 任务RoomId    设备列表RoomId roomid == “0”         脚本发送的RoomId
 
         //  1脚本初始化无roomId
@@ -533,7 +529,7 @@ boolean lock = false;
     @PostMapping("/deleteTask")
     public AjaxResult deleteTask(@RequestBody TaskData taskData){
         //1校验
-        if (taskData.getId()==null || taskData.getId().length() ==0){
+        if (taskData.getId()==null || taskData.getId().isEmpty()){
            return AjaxResult.fail(-1,"请输入正确roomId");
         }
         if (isNumeric0(taskData.getId())){
@@ -634,8 +630,8 @@ boolean lock = false;
                 }
                 log.info("add task integral ");
                 for (int i = 0; i <taskDataList.size(); i++) {
-                    log.info("add task  integral 1111{}",checkInfo.getCardNo());
                     if (taskDataList.get(i).getId().equals(checkInfo.getId())){
+                        log.info("add task  integral 1111{}",checkInfo.getCardNo());
                         taskDataList.get(i).setCreatIntegral((long)integral.get()/6+ taskDataList.get(i).getCreatIntegral());
                     }
                 }

@@ -475,13 +475,17 @@
         // window.onresize = function () {
         //     echartsRecords.resize();
         // }
-        let yesterday = new Date();
-        yesterday.setDate(((new Date()).getDate() -1))
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
 
-        yesterday = yesterday.getFullYear()+"-"+yesterday.getMonth()+"-"+yesterday.getDay();
+        const year = yesterday.getFullYear();
+        const month = String(yesterday.getMonth() + 1).padStart(2, '0');
+        const day = String(yesterday.getDate()).padStart(2, '0');
+        let yesterdayStr = year + '-' + month + '-' + day;
 
         $.ajax({
-            url:"/admin/getOneDayTotalIntegral?searchDate="+ yesterday,
+            url:"/admin/getOneDayTotalIntegral?searchDate="+ yesterdayStr,
             type:"get",
             headers : {'Content-Type' : 'application/json;charset=utf-8'}, //接口json格式
             success:function(data){

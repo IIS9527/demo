@@ -109,7 +109,7 @@ List<DeviceData> deviceDataListGlobal = GlobalVariablesSingleton.getInstance().g
             }
         });
 
-        if (deviceDataList.size() !=0){
+        if (!deviceDataList.isEmpty()){
             taskMapper.insertDeviceData(deviceDataList);
         }
 
@@ -153,7 +153,7 @@ List<DeviceData> deviceDataListGlobal = GlobalVariablesSingleton.getInstance().g
      @Transactional
     public Boolean updateUser(){
         //深复制 复制一份当前 全部用户列表 存进mysql
-        if (GlobalVariablesSingleton.getInstance().getUsers().size() != 0) {
+        if (!GlobalVariablesSingleton.getInstance().getUsers().isEmpty()) {
 
             List<User> users = ObjectUtil.cloneByStream(GlobalVariablesSingleton.getInstance().getUsers());
 
@@ -166,18 +166,12 @@ List<DeviceData> deviceDataListGlobal = GlobalVariablesSingleton.getInstance().g
             List<User> userList = GlobalVariablesSingleton.getInstance().getUsers();
 
             for (int i = 0; i < userList.size(); i++) {
-
                 for (int j = 0; j < users.size(); j++) {
-
                     if (userList.get(i).getCardNo().equals(users.get(j).getCardNo())) {
-
-                        userList.get(i).setTempIntegral(userList.get(i).getTempIntegral() - users.get(j).getTempIntegral());
-
-                        log.info(" DB userListTempIntegral");
-
+                            userList.get(i).setTempIntegral(userList.get(i).getTempIntegral() - users.get(j).getTempIntegral());
+                            log.info(" DB userListTempIntegral");
                     }
                 }
-
             }
         }
         return true;

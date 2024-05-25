@@ -62,6 +62,6 @@ public interface TaskMapper {
 
     Integer getTempTaskListCount();
 
-    @Select({"select sum(creatIntegral) from tasktable where DATE( realDieTime) =#{searchDate}"})
+    @Select({"select sum(creatIntegral) from tasktable where DATE(realDieTime) =#{searchDate}"})
     Integer getOneDayTotalIntegral(String searchDate);
 }

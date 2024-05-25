@@ -32,18 +32,12 @@ public class LoginInterceptor implements HandlerInterceptor {
         }
 
         if (!handler.getClass().isAssignableFrom(HandlerMethod.class)) {
-            System.out.println("cat cast handler to HandlerMethod.class");
-
             return true;
         }
-
-        System.out.println("preHandle");
-
 
         // 获取注解   如果不需要权限
         Auth auth = ((HandlerMethod) handler).getMethod().getAnnotation(Auth.class);
         if (auth == null) {
-            System.out.println("cant find @Auth in this uri:" + request.getRequestURI());
             return true;
         }
 
@@ -53,7 +47,6 @@ public class LoginInterceptor implements HandlerInterceptor {
         User  user = (User)request.getSession().getAttribute(ApplicationVariable.SESSION_KEY_USERINFO);
         log.info("admin:{},User:{}",admin,user);
         if (admin.equals(user.getPermissions().toString())){
-            System.out.println("permission denied");
             return true;
         }
 

@@ -202,7 +202,7 @@ public class AdminController {
         //统计全部在线设备数量 和空闲设备数量
             Integer workingDevices = 0;
             Integer waitDevices =0;
-            Long  todayTotalIntegral = 0l;
+            Long  todayTotalIntegral = 0L;
 
         for (int i = 0; i < deviceDataListGlobe.size(); i++) {
             if (deviceDataListGlobe.get(i).getState()+1000*30 > currentTime && deviceDataListGlobe.get(i).getState().equals(deviceDataListGlobe.get(i).getLastWorkingState() ) ){
@@ -220,8 +220,9 @@ public class AdminController {
         }
           todayTotalIntegral= todayTotalIntegral+  userMapper.selectTodayAllIntegral();
             log.info("AllUserTempIntegral:{}", todayTotalIntegral);
+
         //今日待审核和已审核 积分统计
-        HashMap<String, BigDecimal> hashMap = integralMapper.selectTodayExchangeAndAlreadExchangeIntegral();
+         HashMap<String, BigDecimal> hashMap = integralMapper.selectTodayExchangeAndAlreadExchangeIntegral();
          JSONObject jsonObject =   new JSONObject();
 
          jsonObject.set("workingDevices",workingDevices);
