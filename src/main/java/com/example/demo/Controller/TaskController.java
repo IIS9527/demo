@@ -76,76 +76,41 @@ boolean lock = false;
                               @PathParam("mid") String mid,@PathParam("roomId") String roomId,@PathParam("id") String id,
                                HttpServletRequest httpServletRequest){
 
-
         Long timeNow = System.currentTimeMillis();
-
         //1校验数据md5
-//        log.info("sssssssssssssss?????");
-
         String md5 = SecureUtil.md5(cardNo+personName+time+deviceId+deviceNickName+"sb1314520sbNB$HHHH");
-
         log.info("md5:{},cardNo:{},personName:{},time:{},deviceId:{},deviceNickName:{},mid:{}",md5,cardNo,personName,time,deviceId,deviceNickName,mid);
-
           if (!md5.equals(mid)){
-
-              log.info("sssssssssssssss?????");
-
+              log.error(" error md5 find  check  !!!!!!!!!!");
               return  AjaxResult.fail(-1,"?????你在做什么,唱歌");
-
           }
-
-
-
-
         if(!(timeNow+10000>=Long.parseLong(time)&&(timeNow-10*1000)<Long.parseLong(time))){
-            log.info("timeErro：{}，{}",timeNow,time);
+            log.error("timeErro：{}，{}",timeNow,time);
             return  AjaxResult.fail(-1,"?????你在做什么,唱歌");
         }
-
-
         //脚本请求接受任务
-
         //更新设备状态
-
         int has = 0; //设备是否 在设备列表
-
         int deviceIndex = 0; //记录设备在设备列表的索引
-
         TaskData  taskData = null; //要分配的任务
-
         boolean hasUser = false;//设备用户是否在用户列表中
-
         for (int i = 0; i < userListGlobal.size(); i++) {
-
             if (userListGlobal.get(i).getCardNo().equals(cardNo) && userListGlobal.get(i).getState().equals(1)){  //在账户中 且账户状态正常
-
                 hasUser =true;
-
                 break;
-
             }
         }
-
         if (!hasUser && !lock  ){
-
             //当前设备  无用户拥有
-
             // 从数据库里取出用户信息 存入用户列表
-
             //锁住
                 lock =true;
-
                 User user = userMapper.selectMyInfoByCardNo(cardNo);
-
                 //初始化用户 不需要缓存积分
                 user.setTempIntegral(0L);
-
                 log.info("addUserList:{}",user);
-
                 if (user == null || user.getState().equals(0) ){
-
                     return AjaxResult.fail(-1,"请先注册，或填写正确用户名");
-
                 }
 
             boolean insite = true;
@@ -164,36 +129,18 @@ boolean lock = false;
 
         //是否已在 在线设备列表
         for (int i=0;i<deviceDataList.size();i++){
-
             //设备再设备列表中
             if (deviceDataList.get(i).getDeviceId().equals(deviceId)){  //设备在列表中
-
                 has = 1;
-
                 deviceIndex = i;
-
                 //更新状态时间
                 deviceDataList.get(i).setState(System.currentTimeMillis());
                 deviceDataList.get(i).setDeviceNickName(deviceNickName);
                 deviceDataList.get(i).setPersonName(personName);
-//              log.info("realIp:{}",httpServletRequest.getRemoteAddr());
                 deviceDataList.get(i).setCardNo(cardNo);
                 deviceDataList.get(i).setIp( ipUtil.getIpAddr3(httpServletRequest));
                 deviceDataList.get(i).setHaveWorkTime(timeNow);
                 deviceDataList.get(i).setLastWorkingState(null);
-
-
-                //从任务列表查出发送
-//                for (int j=0;j<taskDataList.size();j++){
-
-//                    if (taskDataList.get(j).getRoomId().equals(deviceDataList.get(i).getRoomId()) && !taskDataList.get(j).getRoomId().equals(roomId) && !roomId.equals("0")){ //已接任务
-//                        log.info("设备已接收任务，任务{},设备：{}",taskDataList.get(j).toString(),deviceDataList.get(i));
-//                        taskDataList.get(j).setSid(String.valueOf(timeNow));
-//                        String sid = SecureUtil.md5(taskDataList.get(j).getVideoName()+taskDataList.get(j).getRoomId()+timeNow+"sb1314520sbNB$");
-//                        return AjaxResult.success(sid,taskDataList.get(j));
-//                    }
-
-//                }
 
                 //如果任务列表中查不到任务 执行清空设备当前任务
                 //删除任务列表中的任务 这里请求后会自动清除  也就是说在删除列表之前 要记录设备列表缓存数据

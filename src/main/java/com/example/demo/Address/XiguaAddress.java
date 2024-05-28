@@ -102,6 +102,7 @@ public class XiguaAddress {
 
         }
         catch ( Exception e){
+            log.error("getRoomId Exception:{}",e.toString());
             return "false";
         }
 
@@ -142,7 +143,7 @@ public class XiguaAddress {
         }
 
         catch ( Exception e){
-            log.info(e.toString());
+            log.error(e.toString());
             return "false";
         }
     }
@@ -236,7 +237,7 @@ public class XiguaAddress {
             document1 = Jsoup.connect(personAddress).headers(userAgent1).followRedirects(false).timeout(2500).get();
 //            log.info(document1.outerHtml());
         } catch (IOException e) {
-            e.printStackTrace();
+           log.error(e.toString());
             return null;
         }
         if (document1 == null){return null; }
@@ -262,7 +263,7 @@ public class XiguaAddress {
         try {
             document = Jsoup.connect("https://www.douyin.com/user/"+sec_uid).headers(userAgent).timeout(2500).get();
         } catch (IOException e) {
-            e.printStackTrace();
+           log.error("getPerson IOException:{}",e.toString());
             return null;
         }
         Elements e = document.getElementsByTag("script");
@@ -332,7 +333,8 @@ public class XiguaAddress {
         options.addArguments("disable-infobars","disable-web-security");
         // 设置无gui 开发时还是不要加，可以看到浏览器效果
         options.addArguments("--headless");
-        String driverPath =  "C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\Application\\chromedriver.exe";
+        String driverPath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+//        String driverPath =  "C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\Application\\chromedriver.exe";
 //        String driverPath =  "C:\\Program Files\\Google\\Chrome\\Application\\chromedriver.exe";
 
 
