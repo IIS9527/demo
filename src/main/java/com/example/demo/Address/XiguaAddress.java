@@ -333,9 +333,8 @@ public class XiguaAddress {
         options.addArguments("disable-infobars","disable-web-security");
         // 设置无gui 开发时还是不要加，可以看到浏览器效果
         options.addArguments("--headless");
-        String driverPath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 //        String driverPath =  "C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\Application\\chromedriver.exe";
-//        String driverPath =  "C:\\Program Files\\Google\\Chrome\\Application\\chromedriver.exe";
+        String driverPath =  "C:\\Program Files\\Google\\Chrome\\Application\\chromedriver.exe";
 
 
         System.setProperty("webdriver.chrome.driver", driverPath);

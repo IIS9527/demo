@@ -84,7 +84,7 @@ boolean lock = false;
               log.error(" error md5 find  check  !!!!!!!!!!");
               return  AjaxResult.fail(-1,"?????你在做什么,唱歌");
           }
-        if(!(timeNow+10000>=Long.parseLong(time)&&(timeNow-10*1000)<Long.parseLong(time))){
+        if(!(timeNow+60000>=Long.parseLong(time)&&(timeNow-60000)<Long.parseLong(time))){
             log.error("timeErro：{}，{}",timeNow,time);
             return  AjaxResult.fail(-1,"?????你在做什么,唱歌");
         }
