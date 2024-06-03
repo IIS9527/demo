@@ -78,7 +78,7 @@ boolean lock = false;
 
         Long timeNow = System.currentTimeMillis();
         //1校验数据md5
-        String md5 = SecureUtil.md5(cardNo+personName+time+deviceId+deviceNickName+"sb1314520sbNB$HHHH");
+        String md5 = SecureUtil.md5(cardNo+personName+time+deviceId+deviceNickName+"sb1314520sbNB$HHHHH");
         log.info("md5:{},cardNo:{},personName:{},time:{},deviceId:{},deviceNickName:{},mid:{}",md5,cardNo,personName,time,deviceId,deviceNickName,mid);
           if (!md5.equals(mid)){
               log.error(" error md5 find  check  !!!!!!!!!!");
