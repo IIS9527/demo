@@ -44,16 +44,16 @@ public class UpdateECController {
             }
 
             EC ec = new EC();
-            ec.setDownload_url("http://haha.idcyou.top:"+port + name);
+            ec.setDownload_url("https://work.spbigidc.net:9100" + name);
             ec.setDialog(true);
             ec.setVersion(version);
             ec.setMsg(message);
-            ec.setForce(false);
+            ec.setForce(force);
 
 
 //            versionMapper.deleteAllVersion();
             if (versionMapper.setVersion(ec)){
-                log.info("version:{},message:{},filepath:{}", version, message, ecFile.addEC(multipartFile));
+                log.info("version:{},message:{},filepath:", version, message);
                 return AjaxResult.success();
             }
 

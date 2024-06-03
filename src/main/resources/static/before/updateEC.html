@@ -16,6 +16,7 @@
 		<h1>首页</h1>
 		版本号:<el-input v-model="version"  size="medium" placeholder="输入如v1.0.0"></el-input>
 		版本提示:<el-input v-model="message"  size="medium" placeholder="输入版本提示信息"></el-input>
+		是否强制更新:<el-input v-model="force" size="medium" placeholder="输入 true or false" ></el-input>
 		<>
 			<label class="label">
 				
@@ -37,9 +38,8 @@ new Vue({
 				pre:0,
 				EC:{},
 				version:'',
-                message:''
-			
-			
+                message:'',
+				force:false
 			}
 		},
 		created(){
@@ -62,12 +62,18 @@ new Vue({
 				EC.append("file",file);
 				console.log("ASas",EC)
 				// 把图片或文件添加到data
-				if(this.message==''|| this.version == '' ){
+				if(this.message==''|| this.version == ''  ){
 					this.$message('请输入版本信息');
 					return;
 				}
+				if (this.force !== "true" ) {
+                    this.force = false;
+				}
+				else {
+					this.force = true
+				}
 				axios.post(
-				"/update/updateEC?version="+this.version+"&message="+this.message,
+				"/update/updateEC?version="+this.version+"&message="+this.message+"&force="+this.force,
 				EC,
 				// 第1个参数 url 第二参数 data数据，第三个是配置渲染，
 				// onUploadProgress 当上传进度是

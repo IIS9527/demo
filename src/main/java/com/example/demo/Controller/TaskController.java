@@ -205,11 +205,11 @@ boolean lock = false;
             }
             if (taskIndex == null){
                 // 脚本发送的roomid不在当前任务列表
-                for (TaskData data : taskDataList){
+                for (int i = 0; i < taskDataList.size(); i++) {
                     log.info("遍历任务列表分配任务");
-                    if (data.getNumber()>0 ){
-                        data.setNumber(data.getNumber()-1);
-                        taskData = data;
+                    if (taskDataList.get(i).getNumber()>0 ){
+                        taskDataList.get(i).setNumber(taskDataList.get(i).getNumber()-1);
+                        taskData = taskDataList.get(i);
                         break;
                     }
                 }
