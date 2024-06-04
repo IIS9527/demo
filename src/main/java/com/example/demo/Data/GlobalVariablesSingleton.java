@@ -27,7 +27,7 @@ public class GlobalVariablesSingleton {
         globalVar = 0L;
         taskDataArrayList = new ArrayList<TaskData>();
         users = new ArrayList<User>();
-        deviceDataArrayList = new ArrayList<DeviceData>();
+        deviceDataArrayList = new ArrayList<DeviceData>(1500);
 
     }
 
