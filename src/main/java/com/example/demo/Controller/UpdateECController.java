@@ -44,7 +44,7 @@ public class UpdateECController {
             }
 
             EC ec = new EC();
-            ec.setDownload_url("https://work.spbigidc.net:9100" + name);
+            ec.setDownload_url("http://work.spbigidc.net:9200" + name);
             ec.setDialog(true);
             ec.setVersion(version);
             ec.setMsg(message);
