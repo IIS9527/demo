@@ -524,8 +524,11 @@ boolean lock = false;
             for (int i = 0; i < deviceDataList.size(); i++) {
                 if (deviceDataList.get(i).getDeviceId().equals(checkInfo.deviceId)) {
                     deviceDataList.get(i).setState(systemTime);
-                    log.info("刷新设备在线状态{}", deviceDataList.get(i));}
+                    log.info("刷新设备在线状态{}", deviceDataList.get(i));
+                    break;
+                }
             }
+            return AjaxResult.success();
         }
         //顺带查找当前任务积分/每分钟
         Long integral = 0L;
