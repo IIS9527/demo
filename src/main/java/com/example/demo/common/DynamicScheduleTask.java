@@ -184,9 +184,6 @@ public class DynamicScheduleTask  {
                 deviceDataListGlobe.remove(i);
             }
         }
-
-        userListGlobal = new ArrayList<User>();
-
     }
 
 
