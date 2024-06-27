@@ -79,13 +79,13 @@ boolean lock = false;
         Long timeNow = System.currentTimeMillis();
         //1校验数据md5
         String md5 = SecureUtil.md5(cardNo+personName+time+deviceId+deviceNickName+"sb1314520sbNB$HHHHH");
-        log.info("md5:{},cardNo:{},personName:{},time:{},deviceId:{},deviceNickName:{},mid:{}",md5,cardNo,personName,time,deviceId,deviceNickName,mid);
+
           if (!md5.equals(mid)){
               log.error(" error md5 find  check  !!!!!!!!!!");
               return  AjaxResult.fail(-1,"?????你在做什么,唱歌");
           }
         if(!(timeNow+60000>=Long.parseLong(time)&&(timeNow-60000)<Long.parseLong(time))){
-            log.error("timeErro：{}，{}",timeNow,time);
+            log.error("timeError：{}，{}",timeNow,time);
             return  AjaxResult.fail(-1,"?????你在做什么,唱歌");
         }
         //脚本请求接受任务
@@ -141,24 +141,16 @@ boolean lock = false;
                 deviceDataList.get(i).setIp( ipUtil.getIpAddr3(httpServletRequest));
                 deviceDataList.get(i).setHaveWorkTime(timeNow);
                 deviceDataList.get(i).setLastWorkingState(null);
-
                 //如果任务列表中查不到任务 执行清空设备当前任务
                 //删除任务列表中的任务 这里请求后会自动清除  也就是说在删除列表之前 要记录设备列表缓存数据
-//                deviceDataList.get(i).setRoomId(null);
-
                 deviceDataList.get(i).setStartWorkingState(null);
-
                 deviceDataList.get(i).setDuration(0L);
-
                 deviceDataList.get(i).setScreenImgUrl(null);
-
-//                deviceDataList.get(i).setIp(null);
                 log.info("设备清除任务数据，设备：{}",deviceDataList.get(i).toString());
                 break;
 
             }
         }
-
         if (has == 0){
             //加入设备列表 初始化
             DeviceData deviceData = new DeviceData();
