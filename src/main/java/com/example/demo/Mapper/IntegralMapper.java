@@ -29,7 +29,7 @@ public interface IntegralMapper {
     boolean agreeExchangeIntegral(@Param("id") BigInteger id);
 
 
-    @Delete({"delete from exchangeIntegral where id=#{id} "})
+    @Update({"update exchangeIntegral set allowState = 3 , where id = #{id} "})
     boolean disAgreeExchangeIntegral(@Param("id") BigInteger id);
 
 
