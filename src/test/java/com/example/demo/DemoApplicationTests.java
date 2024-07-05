@@ -57,14 +57,14 @@ GlobalVariablesSingleton globalVariablesSingleton;
 @Test
     void test4() {
 
-    Date currentDate = new Date(); // current date/time
-    Date date15DaysAgo = DateUtil.offsetDay(currentDate, -2);
-    String formattedDateTime = DateUtil.format(date15DaysAgo, "yyyy-MM-dd HH:mm:ss");
-    log.error(formattedDateTime);
-    integralMapper.deleteExchangeIntegralbyAllowTime(formattedDateTime);
-
-    taskMapper.deleteTaskByTime(formattedDateTime);
-
+//    Date currentDate = new Date(); // current date/time
+//    Date date15DaysAgo = DateUtil.offsetDay(currentDate, -2);
+//    String formattedDateTime = DateUtil.format(date15DaysAgo, "yyyy-MM-dd HH:mm:ss");
+//    log.error(formattedDateTime);
+//    integralMapper.deleteExchangeIntegralbyAllowTime(formattedDateTime);
+//
+//    taskMapper.deleteTaskByTime(formattedDateTime);
+//
 
 
 //    https://www.iesdouyin.com/web/api/v2/user/info/?sec_uid=MS4wLjABAAAATpNX5KX6UVnvIa1laS-QvhEIcugximbVYvPXtbuaqBGRHTcsgMOuLpjBWKDwGUSC&from_ssr=1

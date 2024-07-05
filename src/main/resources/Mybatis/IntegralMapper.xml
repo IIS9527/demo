@@ -6,7 +6,7 @@
 <select id="selectExchangeIntegralList" parameterType="com.example.demo.Data.ExchangeIntegral">
         select * from test.exchangeintegral
         <trim prefix="where" prefixOverrides="and | or">
-               allowState = 1 or allowState = 3
+                allowState in (0,1,3)
                <if test="ei.exchangeTime!=null">
                    and     exchangeTime = #{ei.exchangeTime}
                 </if>
