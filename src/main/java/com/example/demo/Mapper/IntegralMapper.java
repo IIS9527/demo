@@ -29,7 +29,7 @@ public interface IntegralMapper {
     boolean agreeExchangeIntegral(@Param("id") BigInteger id);
 
 
-    @Delete({"delete from exchangeIntegral where id=#{id} "})
+    @Update({"update exchangeIntegral set allowState = 3 , where id = #{id} "})
     boolean disAgreeExchangeIntegral(@Param("id") BigInteger id);
 
 
@@ -37,4 +37,10 @@ public interface IntegralMapper {
 
     @Select({"select * from  exchangeIntegral where id=#{id}"})
     ExchangeIntegral selectExchangeIntegralById(@Param("id")BigInteger id);
+
+
+
+
+    @Delete({"delete from exchangeIntegral  where STR_TO_DATE(allowTime,'%Y-%m-%d %H:%i:%s') < #{date}"})
+    boolean deleteExchangeIntegralbyAllowTime(@Param("date")String date);
 }

@@ -64,4 +64,9 @@ public interface TaskMapper {
 
     @Select({"select sum(creatIntegral) from tasktable where DATE(realDieTime) =#{searchDate}"})
     Integer getOneDayTotalIntegral(String searchDate);
+
+
+    @Delete({"delete from taskTable where realDieTime < #{date}"})
+    boolean deleteTaskByTime(@Param("date") String date);
+
 }

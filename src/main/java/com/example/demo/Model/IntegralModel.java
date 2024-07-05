@@ -52,9 +52,7 @@ public class IntegralModel {
 
     @Transactional
     public boolean agreeExchangeIntegral( BigInteger id) {
-
        return integralMapper.agreeExchangeIntegral(id);
-
     }
 
     @Transactional
@@ -65,6 +63,7 @@ public class IntegralModel {
 
       //加入用户可用积分
       userMapper.addAvailableIntegral(exchangeIntegral.getCardNo(),exchangeIntegral.getIntegral());
+
 
       return integralMapper.disAgreeExchangeIntegral(id);
 

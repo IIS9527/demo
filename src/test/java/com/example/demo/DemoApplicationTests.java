@@ -8,6 +8,7 @@ import com.example.demo.Controller.AdminController;
 import com.example.demo.Controller.TaskController;
 import com.example.demo.Data.*;
 import com.example.demo.Mapper.IntegralMapper;
+import com.example.demo.Mapper.TaskMapper;
 import com.example.demo.Mapper.UserMapper;
 import com.example.demo.Model.TaskModel;
 import com.example.demo.common.DynamicScheduleTask;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -49,11 +51,19 @@ GlobalVariablesSingleton globalVariablesSingleton;
     UserMapper userMapper;
 @Autowired
     DynamicScheduleTask dynamicScheduleTask;
+@Autowired
+    TaskMapper taskMapper;
 
 @Test
     void test4() {
 
-    xiguaAddress.getRoomId("https://v.douyin.com/iYKGpvAT/");
+    Date currentDate = new Date(); // current date/time
+    Date date15DaysAgo = DateUtil.offsetDay(currentDate, -2);
+    String formattedDateTime = DateUtil.format(date15DaysAgo, "yyyy-MM-dd HH:mm:ss");
+    log.error(formattedDateTime);
+    integralMapper.deleteExchangeIntegralbyAllowTime(formattedDateTime);
+
+    taskMapper.deleteTaskByTime(formattedDateTime);
 
 
 

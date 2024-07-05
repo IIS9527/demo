@@ -49,6 +49,10 @@ public class DynamicScheduleTask  {
     @Autowired
     XiguaAddress xiguaAddress;
 
+    @Autowired
+    IntegralMapper integralMapper;
+
+
     @Scheduled(cron ="*/20 * * * * ?")
     public void pushMessage() {
         Long currentTime = System.currentTimeMillis();
@@ -170,7 +174,7 @@ public class DynamicScheduleTask  {
     // everyday zero todo
     @Scheduled(cron ="0 0 0 * * ?")
     @Transactional
-    public void updateDevices() {
+    public void update() {
     // updata tempIntegral
 
         long now = System.currentTimeMillis();
@@ -184,14 +188,12 @@ public class DynamicScheduleTask  {
                 deviceDataListGlobe.remove(i);
             }
         }
-
-        userListGlobal = new ArrayList<User>();
-
+        Date currentDate = new Date(); // current date/time
+        Date date15DaysAgo = DateUtil.offsetDay(currentDate, -15);
+        String formattedDateTime = DateUtil.format(date15DaysAgo, "yyyy-MM-dd HH:mm:ss");
+        integralMapper.deleteExchangeIntegralbyAllowTime(formattedDateTime);
+        taskMapper.deleteTaskByTime(formattedDateTime);
     }
-
-
-
-
 
 
 }

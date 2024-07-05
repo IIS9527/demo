@@ -79,13 +79,13 @@ boolean lock = false;
         Long timeNow = System.currentTimeMillis();
         //1校验数据md5
         String md5 = SecureUtil.md5(cardNo+personName+time+deviceId+deviceNickName+"sb1314520sbNB$HHHHH");
-        log.info("md5:{},cardNo:{},personName:{},time:{},deviceId:{},deviceNickName:{},mid:{}",md5,cardNo,personName,time,deviceId,deviceNickName,mid);
+
           if (!md5.equals(mid)){
               log.error(" error md5 find  check  !!!!!!!!!!");
               return  AjaxResult.fail(-1,"?????你在做什么,唱歌");
           }
         if(!(timeNow+60000>=Long.parseLong(time)&&(timeNow-60000)<Long.parseLong(time))){
-            log.error("timeErro：{}，{}",timeNow,time);
+            log.error("timeError：{}，{}",timeNow,time);
             return  AjaxResult.fail(-1,"?????你在做什么,唱歌");
         }
         //脚本请求接受任务
@@ -141,24 +141,16 @@ boolean lock = false;
                 deviceDataList.get(i).setIp( ipUtil.getIpAddr3(httpServletRequest));
                 deviceDataList.get(i).setHaveWorkTime(timeNow);
                 deviceDataList.get(i).setLastWorkingState(null);
-
                 //如果任务列表中查不到任务 执行清空设备当前任务
                 //删除任务列表中的任务 这里请求后会自动清除  也就是说在删除列表之前 要记录设备列表缓存数据
-//                deviceDataList.get(i).setRoomId(null);
-
                 deviceDataList.get(i).setStartWorkingState(null);
-
                 deviceDataList.get(i).setDuration(0L);
-
                 deviceDataList.get(i).setScreenImgUrl(null);
-
-//                deviceDataList.get(i).setIp(null);
                 log.info("设备清除任务数据，设备：{}",deviceDataList.get(i).toString());
                 break;
 
             }
         }
-
         if (has == 0){
             //加入设备列表 初始化
             DeviceData deviceData = new DeviceData();
@@ -504,100 +496,89 @@ boolean lock = false;
     public AjaxResult checkState(@RequestBody CheckInfo checkInfo,@PathParam("mid") String mid){
 
         //只有在脚本接收任务后才会请求该接口 每十秒记录一次任务状态
+        //一般 参数 账号、设备唯一标识、设备昵称、直播间id、任务状态（在任务直播间或不在）、当前时间、md5校验
         String md5 = SecureUtil.md5(checkInfo.getCardNo()+checkInfo.getDeviceId()+checkInfo.getRoomId()+checkInfo.getTime()+checkInfo.getVideoDieOut()+checkInfo.getTaskState()+checkInfo.getId()+"sb1314520sbNB$");
         if (!md5.equals(mid)){return  AjaxResult.fail(-1,"?????你在做什么,唱歌");}
         if (!StrUtil.isEmptyIfStr(checkInfo.getVideoDieOut())&&checkInfo.getVideoDieOut().equals("true")){//脚本发现直播间任务结束
-            log.info("checkState:{}",checkInfo.getVideoDieOut());
             for (int i = 0; i < taskDataList.size(); i++) {
                 if (taskDataList.get(i).getId().equals(checkInfo.getId())){ //找到任务直播间 删除他
-                    log.info("checkState deleteTaskById:{}", checkInfo);
+                    log.info("find the end room checkState deleteTaskById:{}", checkInfo);
                     taskModel.deleteTaskById(checkInfo.getId());
                     break;
                 }
             }
+            return AjaxResult.fail(400,"任务失效");
         }
-        //一般 参数 账号、设备唯一标识、设备昵称、直播间id、任务状态（在任务直播间或不在）、当前时间、md5校验
-
         Long systemTime = System.currentTimeMillis();
-
-        //返回状态  0 停止任务 1 正常继续执行
-//        int state = 0;
-        //顺带查找当前任务积分/每分钟
-        AtomicInteger integral = new AtomicInteger(0);
-        //查询当前直播间列表 判断脚本发送的直播间任务是否有效
-        for(int i=0;i<taskDataList.size();i++){
-            if (taskDataList.get(i).getId().equals(checkInfo.getId())&&taskDataList.get(i).getIntegral()!=null&&taskDataList.get(i).getIntegral()>0 ){
-                log.info("find the task taskDataList length:{}",taskDataList.size());
-                integral.set(taskDataList.get(i).getIntegral());
-                break;
-            }
-        }
-        if (integral.get()==0){return AjaxResult.fail(400,"任务失效");}
-        //积分统计
-        // 任务有效 且脚本发送 在任务直播间中
-        if (checkInfo.getTaskState().equals("true")){
-             AtomicInteger isWork = new AtomicInteger(0);
-             log.info("任务有效 且脚本发送 在任务直播间中");
-             deviceDataList.stream().parallel().forEachOrdered(item -> {
-                 //找到设备位置  第一次发送请求 接受到workingTime
-                 if (item.getDeviceId().equals(checkInfo.deviceId)&&item.getStartWorkingState() ==null){
-                     log.info("第一次找到 device ");
-                     item.setStartWorkingState(systemTime);
-                     item.setLastWorkingState(systemTime);
-                     item.setState(systemTime);
-                     item.setDuration(0L);
-                 }
-                 else if (item.getDeviceId().equals(checkInfo.deviceId)){
-                     //有效时间段请求
-                     long l =  systemTime - item.getLastWorkingState();
-                     log.info("第二次找到device {}", item);
-                     if (l<1000*20 && l>1000*10) {
-                         log.info("脚本发送时间有效,记录当前时间和统计积分{}",item);
-                         item.setLastWorkingState(systemTime);
-                         item.setDuration(l+item.getDuration());
-                         item.setTodayTaskIntegral(((long) integral.get()/6)+item.getTodayTaskIntegral()); //今日积分
-                         isWork.set((int)l);
-                     }
-                     else {
-                         item.setLastWorkingState(systemTime);
-                         log.info("脚本发送时间无效,记录下当前时间从次开始判断有效时间{}",item);
-                     }
-                     item.setState(systemTime);
-                 }
-             });
-             //增加用户积分
-            if (integral.get()!=0&&isWork.get()!=0){
-                for (int i = 0; i <userListGlobal.size(); i++) {
-                    if (userListGlobal.get(i).getCardNo().equals(checkInfo.getCardNo())){
-                        log.info("增加用户积分 cardNo:{},integral:{}",userListGlobal.get(i).getCardNo(),userListGlobal.get(i).getTempIntegral());
-                        if (userListGlobal.get(i).getTempIntegral()==null ){ userListGlobal.get(i).setTempIntegral(0L); }
-                        userListGlobal.get(i).setTempIntegral((long)integral.get()/6 + userListGlobal.get(i).getTempIntegral());
-                        break;
-                    }
-                }
-                log.info("add task integral ");
-                for (int i = 0; i <taskDataList.size(); i++) {
-                    if (taskDataList.get(i).getId().equals(checkInfo.getId())){
-                        log.info("add task  integral 1111{}",checkInfo.getCardNo());
-                        taskDataList.get(i).setCreatIntegral((long)integral.get()/6+ taskDataList.get(i).getCreatIntegral());
-                    }
+        //当脚本领取任务后还未进入直播间
+        if (!checkInfo.getTaskState().equals("true")){
+            // 任务有效 在任务中 但是还没进入直播间 //刷新设备在线状态
+            for (int i = 0; i < deviceDataList.size(); i++) {
+                if (deviceDataList.get(i).getDeviceId().equals(checkInfo.deviceId)) {
+                    deviceDataList.get(i).setState(systemTime);
+                    log.info("刷新设备在线状态{}", deviceDataList.get(i));
+                    break;
                 }
             }
             return AjaxResult.success();
         }
-        else {
-            // 任务有效 在任务中 但是还没进入直播间 //刷新设备在线状态
-            deviceDataList.stream().parallel().forEach(item ->{
-                if (item.getDeviceId().equals(checkInfo.deviceId)){
-                    item.setState(systemTime);
-                    log.info("刷新设备在线状态{}",item);
-                }
-            });
+        //顺带查找当前任务积分/每分钟
+        Long integral = 0L;
+        //查询当前直播间列表 判断脚本发送的直播间任务是否有效
+        for(int i=0;i<taskDataList.size();i++){
+            if (taskDataList.get(i).getId().equals(checkInfo.getId())&&taskDataList.get(i).getIntegral()!=null&&taskDataList.get(i).getIntegral()>0 ){
+                log.info("find the task taskDataList length:{}",taskDataList.size());
+                integral= (long)(taskDataList.get(i).getIntegral()/6);
+                break;
+            }
         }
-
-        return  AjaxResult.success();
-
-
+        if (integral.equals(0L)){return AjaxResult.fail(400,"任务失效");}
+        //积分统计
+        // 任务有效 且脚本发送 在任务直播间中
+        boolean isWork = false;
+        for (int i = 0; i < deviceDataList.size(); i++) {
+            // 第一次发送请求接收到 workingTime
+            if (deviceDataList.get(i).getDeviceId().equals(checkInfo.deviceId) && deviceDataList.get(i).getStartWorkingState() == null) {
+                log.info("第一次找到 device");
+                deviceDataList.get(i).setStartWorkingState(systemTime);
+                deviceDataList.get(i).setLastWorkingState(systemTime);
+                deviceDataList.get(i).setState(systemTime);
+                deviceDataList.get(i).setDuration(0L);
+            }
+            else if (deviceDataList.get(i).getDeviceId().equals(checkInfo.deviceId)&& deviceDataList.get(i).getStartWorkingState() != null) {
+                // 有效时间段请求
+                long l = systemTime - deviceDataList.get(i).getLastWorkingState();
+                if (l > 1000 * 20 || l < 1000 * 10) {
+                    log.info("脚本发送时间无效,记录下当前时间从下次开始判断有效时间 {}", deviceDataList.get(i));
+                }
+                else {
+                    deviceDataList.get(i).setDuration(l + deviceDataList.get(i).getDuration());
+                    deviceDataList.get(i).setTodayTaskIntegral(integral+ deviceDataList.get(i).getTodayTaskIntegral()); // 今日积分
+                    isWork=true;
+                }
+                deviceDataList.get(i).setLastWorkingState(systemTime);
+                deviceDataList.get(i).setState(systemTime);
+                break;
+            }
+        }
+        //增加用户积分
+        if (!integral.equals(0L)&&isWork){
+            for (int i = 0; i <userListGlobal.size(); i++) {
+                if (userListGlobal.get(i).getCardNo().equals(checkInfo.getCardNo())){
+                    log.info("增加用户积分 cardNo:{},integral:{}",userListGlobal.get(i).getCardNo(),userListGlobal.get(i).getTempIntegral());
+                    if (userListGlobal.get(i).getTempIntegral()==null ){ userListGlobal.get(i).setTempIntegral(0L); }
+                    userListGlobal.get(i).setTempIntegral(integral + userListGlobal.get(i).getTempIntegral());
+                    break;
+                }
+            }
+            for (int i = 0; i <taskDataList.size(); i++) {
+                if (taskDataList.get(i).getId().equals(checkInfo.getId())){
+                    taskDataList.get(i).setCreatIntegral(integral+ taskDataList.get(i).getCreatIntegral());
+                    break;
+                }
+            }
+        }
+        return AjaxResult.success();
     }
 
 
