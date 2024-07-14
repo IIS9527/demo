@@ -22,10 +22,7 @@ public class test2 {
 
     @Test
     public void test(){
-
-////        xiguaAddress.getRoomId("https://v.douyin.com/iF4YNGLC/");
-//        xiguaAddress.getVideoName("https://v.douyin.com/iF4YNGLC/");
-//
+        
         WebClient webClient = new WebClient(BrowserVersion.CHROME);
         webClient.getOptions().setJavaScriptEnabled(true);
         webClient.getOptions().setCssEnabled(false);
