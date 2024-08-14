@@ -54,6 +54,9 @@ public class TaskData {
     public String personAddress;
 
 
+     public  String token ;
+
+
     public  Long  creatIntegral;
 
     public List<DeviceData> deviceDataList;
@@ -66,7 +69,4 @@ public class TaskData {
         return creatIntegral;
     }
 
-    public void setPersonAddress(String personAddress) {
-        this.personAddress = personAddress;
-    }
 }

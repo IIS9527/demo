@@ -7,17 +7,22 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
+import com.example.demo.Address.XiguaAddress;
 import com.example.demo.Config.AjaxResult;
 import com.example.demo.Config.Auth;
 import com.example.demo.Data.DeviceData;
 import com.example.demo.Data.GlobalVariablesSingleton;
 import com.example.demo.Data.TaskData;
+import com.example.demo.Mapper.TaskMapper;
 import com.example.demo.Model.TaskModel;
 import jakarta.websocket.server.PathParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Calendar;
@@ -33,26 +38,18 @@ public class LitemallController {
 
     public static final String KEY_MD5 = "MD6";
 
+
     //在线设备对象列表
     List<DeviceData> deviceDataListGlobe = GlobalVariablesSingleton.getInstance().getDeviceDataArrayList();
     @Autowired
     TaskModel taskModel;
 
-    /**
-     *
-     * @param id
-     * @return 空闲设备数量
-     */
-    @GetMapping("/getRemainderDeviceNumber")
-    public AjaxResult getTaskDeviceList(@PathParam("id") String id ) {
-         int remainderDevices = 0;
-        for (int i = 0; i < deviceDataListGlobe.size(); i++) {
-            if (deviceDataListGlobe.get(i).getLastWorkingState()!= null){
-                remainderDevices++;
-            }
-        }
-       return AjaxResult.success(remainderDevices);
-    }
+    @Autowired
+    XiguaAddress xiguaAddress;
+
+    @Autowired
+    TaskMapper taskMapper;
+
 
 
     /**
@@ -61,50 +58,107 @@ public class LitemallController {
      * @return
      */
 
-    @PostMapping("/setTask")
-    public AjaxResult setTask(TaskData taskData ){
-         log.info("{}",taskData);
 
-        try {
-            encryMD5(taskData.getSign().getBytes(StandardCharsets.UTF_8));
-        } catch (Exception e) {
-            e.printStackTrace();
+    @PostMapping("/setTask")
+    public AjaxResult setTask(@RequestBody TaskData taskData ){
+
+        if ( taskData.getToken() == null||!taskData.getToken().equals("asjdfbajskdfnkwe234123kljdfnkljsdgn2kwfdlknasdln")   ){
+            return AjaxResult.fail(404,"参数出错");
         }
 
 
         //参数校验
-        if ( taskData.getNumber() ==null || taskData.number.equals(0) || taskData.number<0){
-            return AjaxResult.fail(404,"ssssss");
+        if ( taskData.number ==null || taskData.number.equals(0)||taskData.number<0){
+            return AjaxResult.fail(404,"设备数出错");
         }
-        if (taskData.integral ==null || taskData.integral <= 0){
-            return AjaxResult.fail(404,"请输入任务每分钟积分");
+        if (taskData.duration == null){
+            return AjaxResult.fail(404,"时常出错");
         }
-        if (StrUtil.isEmptyIfStr(taskData.getRoomId())|| StrUtil.isEmptyIfStr(taskData.getVideoName()) ||!NumberUtil.isNumber(taskData.getRoomId())){
-            return AjaxResult.fail(404,"请输入roomId");
-        }
-
         taskData.setCreatIntegral(0L);
 
         taskData.setNumberStatic(taskData.getNumber());
 
+        Long duration= Integer.parseInt(taskData.getDuration())*60L;
 
-        //设置截止时间戳  此时duration 为小时
-        taskData.setBeginTimeTo(DateUtil.parse(taskData.getBeginTimeFrom()).offset(DateField.HOUR,Integer.parseInt(taskData.getDuration())).toString());
+        taskData.setBeginTimeTo(DateUtil.offsetMinute(DateUtil.parse(taskData.getBeginTimeFrom()),duration.intValue()).toString());
+
+        if ( DateUtil.between( DateUtil.date(),DateUtil.parse(taskData.beginTimeTo), DateUnit.MINUTE)<10){
+            return AjaxResult.fail(404,"任务时间小于十分钟");
+        }
+
+        taskData.setDuration(duration.toString());
+
+
+        //设置截止时间戳
         taskData.setTime(String.valueOf(DateUtil.parse(taskData.beginTimeTo).getTime()));
 
-        //duration转为分钟
-        int duration = Integer.parseInt(taskData.getDuration())*60;
-        taskData.setDuration(Integer.toString(duration));
 
-        //加入任务
+        if (taskData.integral ==null || taskData.integral <= 0){
+            return AjaxResult.fail(404,"请输入任务每分钟积分");
+        }
+        if (DateUtil.compare( DateUtil.parse(taskData.beginTimeFrom),DateUtil.date())>0){
+            // 加入临时任务表
+            log.info("addTempTask {}",taskData);
+            if ( taskMapper.addTempTask(taskData)){
+                return  AjaxResult.success();
+            }
+            else {
+                return AjaxResult.fail(-1,"加入任务出错");
+            }
+        }
+
+
+        if (taskData.getPersonAddress() !=null && !taskData.getPersonAddress().isEmpty()){
+            //解析直播间roomId
+            String roomId = xiguaAddress.getRoomIdByPersonAddress(taskData.getPersonAddress());
+            if (roomId == null){
+                return AjaxResult.fail(404,"地址解析错误");
+            }
+            //获取直播人名
+            String videoName = xiguaAddress.getNickNameByPersonAddress(taskData.getPersonAddress());
+            if (videoName == null){
+                return AjaxResult.fail(404,"直播人地址解析错误");
+            }
+            taskData.setRoomId(roomId);
+            taskData.setVideoName(videoName);
+
+            String xiguaName = xiguaAddress.getXiGuaName(roomId);
+            if (xiguaName == null){
+                xiguaName = xiguaAddress.getXiGuaName(roomId);
+            }
+            if (xiguaName != null){
+                taskData.setVideoName(xiguaName);
+                taskData.setVideoNameXiGua(xiguaName);
+            }
+
+        }
+
+        if (StrUtil.isEmptyIfStr(taskData.getRoomId()) || StrUtil.isEmptyIfStr(taskData.getVideoName()) || !NumberUtil.isNumber(taskData.getRoomId())){
+            return AjaxResult.fail(404,"RoomId 出错");
+        }
+
         taskData.setBeginTimeFrom(DateUtil.date(Calendar.getInstance()).toString());
         taskData.setId(IdUtil.randomUUID());
-         if (taskModel.setTask(taskData))  {
-             return  AjaxResult.success();
-         }
+        taskModel.setTask(taskData);
 
-         return  AjaxResult.fail(404,"未知错误");
+        return  AjaxResult.success();
+    }
 
+    /*
+    * 获取空闲设备数量
+    *
+    *
+    * */
+    @GetMapping("/devices")
+    public AjaxResult getDevices(){
+        Long currentTime = System.currentTimeMillis();
+        Integer workingDevices = 0;
+        for (int i = 0; i < deviceDataListGlobe.size(); i++) {
+            if (deviceDataListGlobe.get(i).getState()+1000*30 > currentTime && deviceDataListGlobe.get(i).getState().equals(deviceDataListGlobe.get(i).getLastWorkingState() ) ){
+                workingDevices++;
+            }
+        }
+        return AjaxResult.success(workingDevices);
     }
 
 
