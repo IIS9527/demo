@@ -23,8 +23,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Controller;
@@ -325,16 +328,25 @@ public class XiguaAddress {
 
     }
 
-    public String getXiGuaName(String roomid) {
+    public String getXiGuaName1(String roomid) {
 
         ChromeOptions options =new ChromeOptions();
-
+        FirefoxOptions firefoxOptions =new FirefoxOptions();
         // 设置允许弹框
         options.addArguments("disable-infobars","disable-web-security");
+        firefoxOptions.addArguments("disable-infobars","disable-web-security");
+
         // 设置无gui 开发时还是不要加，可以看到浏览器效果
         options.addArguments("--headless");
+        firefoxOptions.addArguments("--headless");
+        options.addArguments("--no-sandbox");
+        firefoxOptions.addArguments("--no-sandbox");
+//        options.addArguments('--disable-gpu');
+//        options.addArguments('--disable-dev-shm-usage');
+
 //        String driverPath =  "C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\Application\\chromedriver.exe";
-        String driverPath =  "C:\\Program Files\\Google\\Chrome\\Application\\chromedriver.exe";
+        String driverPath =  "/usr/bin/chromedriver";
+//        String driverPath =  "C:\\Program Files\\Google\\Chrome\\Application\\chromedriver.exe";
 
 
         System.setProperty("webdriver.chrome.driver", driverPath);
@@ -342,7 +354,7 @@ public class XiguaAddress {
         HashMap<String,String>  mobileEmulation = new HashMap<String,String>();
         mobileEmulation.put("deviceName","iPhone XR");
         options.setExperimentalOption("mobileEmulation", mobileEmulation);
-
+        firefoxOptions.addArguments("-moz-mobile");
         ChromeDriver driver=  new ChromeDriver(options);
 
         driver.get("https://webcast-open.douyin.com/open/webcast/reflow/?webcast_app_id=247160&room_id="+roomid);
@@ -354,11 +366,70 @@ public class XiguaAddress {
 
         log.info("xiguaName find is :{}", xiguaName);
 
-        driver.close();
+        driver.quit();
+
+//        try {
+//            // 构建命令：使用任务管理器命令来结束进程
+//            String command = "taskkill /F /IM chromedriver.exe";
+//
+//            // 执行命令
+//            Process process = Runtime.getRuntime().exec(command);
+//
+//            // 等待命令执行完成
+//            process.waitFor();
+//
+//            // 检查进程是否成功终止
+//            if (process.exitValue() == 0) {
+//                System.out.println("chromedriver.exe has been terminated.");
+//            } else {
+//                System.out.println("Failed to terminate chromedriver.exe.");
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
         return xiguaName;
 
     }
+    public  String  getXiGuaName(String roomId){
+        // 设置 GeckoDriver 路径
+        System.setProperty("webdriver.gecko.driver", "/usr/bin/geckodriver");
+
+        // 创建 FirefoxOptions 对象，用于配置浏览器选项
+        FirefoxOptions options = new FirefoxOptions();
+
+        // 创建一个 map 用于模拟手机设备的 UA 信息
+        Map<String, Object> deviceMetrics = new HashMap<>();
+        deviceMetrics.put("width", 360);
+        deviceMetrics.put("height", 640);
+        deviceMetrics.put("pixelRatio", 3.0);
+
+        Map<String, Object> mobileEmulation = new HashMap<>();
+        mobileEmulation.put("deviceMetrics", deviceMetrics);
+        mobileEmulation.put("userAgent", "Mozilla/5.0 (iPhone; CPU iPhone OS 13_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.4 Mobile/15E148 Safari/604.1");
+
+        // 将手机模拟选项添加到 FirefoxOptions 中
+        options.addPreference("general.useragent.override", mobileEmulation.get("userAgent").toString());
+
+        // 启动 WebDriver
+        WebDriver driver = new FirefoxDriver(options);
+
+        driver.get("https://webcast-open.douyin.com/open/webcast/reflow/?webcast_app_id=247160&room_id="+roomId);
 
 
+        new WebDriverWait(driver, Duration.ofMinutes(1)).until(ExpectedConditions.presenceOfElementLocated(By.className("saas-reflow-room-anchor-name")));
+
+        String   xiguaName =  driver.findElement(By.className("saas-reflow-room-anchor-name")).getAttribute("textContent");
+
+        log.info("xiguaName find is :{}", xiguaName);
+
+
+        // 关闭浏览器
+        driver.quit();
+        return xiguaName;
+    }
 }
+
+
+
+

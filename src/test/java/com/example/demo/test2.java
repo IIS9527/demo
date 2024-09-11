@@ -6,12 +6,18 @@ import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeDriverService;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.lang.Thread.sleep;
 
 @SpringBootTest
 public class test2 {
@@ -21,75 +27,48 @@ public class test2 {
     private XiguaAddress xiguaAddress;
 
     @Test
-    public void test(){
-        
-        WebClient webClient = new WebClient(BrowserVersion.CHROME);
-        webClient.getOptions().setJavaScriptEnabled(true);
-        webClient.getOptions().setCssEnabled(false);
-        webClient.getOptions().setActiveXNative(false);
-        webClient.getOptions().setRedirectEnabled(true);
-        webClient.getOptions().setThrowExceptionOnScriptError(false);
-        webClient.getOptions().setThrowExceptionOnFailingStatusCode(false);
-        webClient.getOptions().setTimeout(6000);
+    public void test() throws InterruptedException, IOException {
+        ChromeOptions options =new ChromeOptions();
 
-        // -----重点-----设置为我们自定义的错误处理类
+        // 设置允许弹框
+        options.addArguments("disable-infobars","disable-web-security");
+        // 设置无gui 开发时还是不要加，可以看到浏览器效果
+        options.addArguments("--headless");
+//        String driverPath =  "C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\Application\\chromedriver.exe";
+        String driverPath =  "C:\\Program Files\\Google\\Chrome\\Application\\chromedriver.exe";
+        System.setProperty("webdriver.chrome.driver", driverPath);
 
-//        webClient.setJavaScriptErrorListener(new XiguaAddress.MyJSErrorListener());
 
-        webClient.setJavaScriptTimeout(5000);
-
-        try {
-            HtmlPage page =webClient.getPage("http://127.0.0.1:9527/outback/list?page=1&limit=25&sort=add_time&order=desc&start=&end=");
-            System.out.println(page);
-        } catch (IOException e) {
-            e.printStackTrace();
+        for (int i = 0; i < 5; i++) {
+            ChromeDriver driver=  new ChromeDriver(options);
+            driver.get("https://www.baidu.com");
+//            driver.close();
+//           driver.quit();
+            sleep(1000);
+            driver.quit();
         }
 
-        webClient.waitForBackgroundJavaScript(6000);
+        try {
+            // 构建命令：使用任务管理器命令来结束进程
+            String command = "taskkill /F /IM chromedriver.exe";
 
-//        List<Integer> list =new ArrayList<>();
-//
-//        for (int i = 0; i < 10000; i++) {
-//            list.add(i);
-//        }
-//
-//        Runnable runnable2 = new Runnable(){
-//            @Override
-//            public void run() {
-//                while (true){
-//
-//
-//                    for (int j = 0; j < list.size(); j++) {
-//                        list.get(j);
-//                    }
-//                }
-//            }
-//        };
-//
-//        Runnable runnable = new Runnable(){
-//            @Override
-//            public void run() {
-//                int i=4;
-//                while (true){
-//                    list.remove(i);
-//                    i++;
-//                    try {
-//                        Thread.sleep(1000);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-//        };
-//        Thread thread =new Thread(runnable);
-//        Thread thread2 =new Thread(runnable2);
-//        try {
-//            Thread.sleep(100000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//
+            // 执行命令
+            Process process = Runtime.getRuntime().exec(command);
 
+            // 等待命令执行完成
+            process.waitFor();
+
+            // 检查进程是否成功终止
+            if (process.exitValue() == 0) {
+                System.out.println("chromedriver.exe has been terminated.");
+            } else {
+                System.out.println("Failed to terminate chromedriver.exe.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
+
 
 }

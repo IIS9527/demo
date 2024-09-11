@@ -41,6 +41,8 @@ public class LitemallController {
 
     //在线设备对象列表
     List<DeviceData> deviceDataListGlobe = GlobalVariablesSingleton.getInstance().getDeviceDataArrayList();
+    //在线任务列表
+    List<TaskData> taskDataList = GlobalVariablesSingleton.getInstance().getTaskDataArrayList();
     @Autowired
     TaskModel taskModel;
 
@@ -92,19 +94,10 @@ public class LitemallController {
         //设置截止时间戳
         taskData.setTime(String.valueOf(DateUtil.parse(taskData.beginTimeTo).getTime()));
 
+        log.error(taskData.getBeginTimeTo()+taskData.getBeginTimeFrom()+taskData.getDuration());
 
         if (taskData.integral ==null || taskData.integral <= 0){
             return AjaxResult.fail(404,"请输入任务每分钟积分");
-        }
-        if (DateUtil.compare( DateUtil.parse(taskData.beginTimeFrom),DateUtil.date())>0){
-            // 加入临时任务表
-            log.info("addTempTask {}",taskData);
-            if ( taskMapper.addTempTask(taskData)){
-                return  AjaxResult.success();
-            }
-            else {
-                return AjaxResult.fail(-1,"加入任务出错");
-            }
         }
 
 
@@ -152,13 +145,21 @@ public class LitemallController {
     @GetMapping("/devices")
     public AjaxResult getDevices(){
         Long currentTime = System.currentTimeMillis();
-        Integer workingDevices = 0;
+        Integer waitDevices = 0;
+
         for (int i = 0; i < deviceDataListGlobe.size(); i++) {
-            if (deviceDataListGlobe.get(i).getState()+1000*30 > currentTime && deviceDataListGlobe.get(i).getState().equals(deviceDataListGlobe.get(i).getLastWorkingState() ) ){
-                workingDevices++;
+             if (deviceDataListGlobe.get(i).getState()+1000*60 > currentTime){
+                waitDevices++;
             }
         }
-        return AjaxResult.success(workingDevices);
+        for (int i = 0; i < taskDataList.size(); i++) {
+            waitDevices = waitDevices - taskDataList.get(i).getNumberStatic();
+        }
+        if (waitDevices<0){
+            return AjaxResult.fail(404,"设备数出错");
+        }
+        log.info("workingDevices {}",waitDevices);
+        return AjaxResult.success(waitDevices);
     }
 
 
