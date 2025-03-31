@@ -14,5 +14,5 @@ public class CheckInfo {
    public String videoDieOut;
    public Long time;
    public String checkM;
-
+   public String aseKey;
 }

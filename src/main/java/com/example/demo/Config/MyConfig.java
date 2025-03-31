@@ -31,7 +31,8 @@ public class MyConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/update/getUpdateECVersion")//更新版本地址
                 .excludePathPatterns("/litemall/devices")
                 .excludePathPatterns("/litemall/setTask")
-                .excludePathPatterns("/Task/screenUpload");
+                .excludePathPatterns("/Task/screenUpload")
+                .excludePathPatterns("/litemall/checkTask");
 
     }
 }

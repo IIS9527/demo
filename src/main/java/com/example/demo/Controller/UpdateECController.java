@@ -43,7 +43,7 @@ public class UpdateECController {
                 return AjaxResult.fail(404, "上传文件错误");
             }
             EC ec = new EC();
-            ec.setDownload_url("http://work.luckydbl.top:9500/" + name);
+            ec.setDownload_url("http://work.luckydbl.top:9500" + name);
             ec.setDialog(true);
             ec.setVersion(version);
             ec.setMsg(message);

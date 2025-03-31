@@ -3,6 +3,7 @@ package com.example.demo.common;
 
 import cn.hutool.Hutool;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
@@ -18,6 +19,7 @@ import com.example.demo.Data.User;
 import com.example.demo.Mapper.IntegralMapper;
 import com.example.demo.Mapper.TaskMapper;
 import com.example.demo.Mapper.UserMapper;
+import com.example.demo.Model.DevicesModel;
 import com.example.demo.Model.TaskModel;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +53,8 @@ public class DynamicScheduleTask  {
 
     @Autowired
     IntegralMapper integralMapper;
+    @Autowired
+    DevicesModel devicesModel;
 
 
     @Scheduled(cron ="*/20 * * * * ?")
@@ -121,6 +125,9 @@ public class DynamicScheduleTask  {
                   log.error("delete temp false ");
                   continue;
               }
+              if (!devicesModel.checkNowDeviceNumber(tempTaskDataList.get(i))){
+                  continue;
+              }
                 //判断roomid和直播名称
                 if (StrUtil.isEmptyIfStr(tempTaskDataList.get(i).getRoomId()) || StrUtil.isEmptyIfStr(tempTaskDataList.get(i).getVideoName())){
                     if (tempTaskDataList.get(i).getRoomAddress() !=null && !tempTaskDataList.get(i).getRoomAddress().isEmpty()){
@@ -141,13 +148,22 @@ public class DynamicScheduleTask  {
                     }
                     if (tempTaskDataList.get(i).getPersonAddress() !=null && !tempTaskDataList.get(i).getPersonAddress().isEmpty()){
                         //解析直播间roomId
-                        String roomId = xiguaAddress.getRoomIdByPersonAddress(tempTaskDataList.get(i).getPersonAddress());
-                        if (roomId == null){
+                        String sec_uid = xiguaAddress.getsecuidBypersonAddress(tempTaskDataList.get(i).getPersonAddress());
+                        String roomId = xiguaAddress.getRoomIdByPersonAddress(sec_uid);
+                        if (roomId == null || roomId.isEmpty() ){
                             log.error("roomId By person address false");
+                            // 设置5分钟后再次预约
+                            if ((Long.parseLong(tempTaskDataList.get(i).getTime()) - currentTime)/60000 >30){
+                                tempTaskDataList.get(i).setBeginTimeFrom(DateUtil.format(DateUtil.offset(DateUtil.date(), DateField.MINUTE, 5),"yyyy-MM-dd HH:mm:ss"));
+                                tempTaskDataList.get(i).setDuration(Long.toString(DateUtil.between( DateUtil.parse(tempTaskDataList.get(i).getBeginTimeFrom()),DateUtil.parse(tempTaskDataList.get(i).beginTimeTo), DateUnit.MINUTE)));
+                                tempTaskDataList.get(i).setBeginTimeTo(tempTaskDataList.get(i).beginTimeTo);
+                                tempTaskDataList.get(i).setId(null);
+                                taskMapper.addTempTask(tempTaskDataList.get(i));
+                            }
                             continue;
                         }
                         //获取直播人名
-                        String videoName = xiguaAddress.getNickNameByPersonAddress(tempTaskDataList.get(i).getPersonAddress());
+                        String videoName = xiguaAddress.getNickNameByPersonAddress(sec_uid);
                         if (videoName == null){
                             log.error("videoName By person address false");
                             continue;
@@ -188,6 +204,7 @@ public class DynamicScheduleTask  {
                 deviceDataListGlobe.remove(i);
             }
         }
+        //删除15天前任务
         Date currentDate = new Date(); // current date/time
         Date date15DaysAgo = DateUtil.offsetDay(currentDate, -15);
         String formattedDateTime = DateUtil.format(date15DaysAgo, "yyyy-MM-dd HH:mm:ss");

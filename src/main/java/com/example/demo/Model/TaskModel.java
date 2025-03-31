@@ -214,7 +214,7 @@ List<DeviceData> deviceDataListGlobal = GlobalVariablesSingleton.getInstance().g
         }
 
         //如果当前空闲设备小于任务总量  直接加进先到先得任务列表
-        if (!(allWaitDevices+50>taskData.getNumber())){
+        if (allWaitDevices+50<taskData.getNumber()){
             taskDataListGlobal.add(taskData);
             return  true;
         }

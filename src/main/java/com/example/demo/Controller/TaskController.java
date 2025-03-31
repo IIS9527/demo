@@ -2,6 +2,7 @@ package com.example.demo.Controller;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.collection.ListUtil;
+import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.net.Ipv4Util;
@@ -37,9 +38,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @RestController
@@ -57,7 +59,6 @@ public class TaskController {
     File file;
 @Autowired
     IpUtil ipUtil;
-
 //在线任务列表
 List<TaskData> taskDataList = GlobalVariablesSingleton.getInstance().getTaskDataArrayList();
 
@@ -244,24 +245,7 @@ boolean lock = false;
                 }
 
 
-//            for (TaskData data : taskDataList){
-//                log.info("遍历任务列表分配任务");
-//
-//                //脚本执行出错 重新领取任务 带上上一次的roomid
-//                //回收脚本之前接的任务
-//
-//
-//
-//
-//
-//
-//                //脚本之前接过任务 再分配任务
-////                if (data.number > 0 && !data.getRoomId().equals(roomId)) {
-////                    data.number = data.number - 1;
-////                    taskData = data;
-////                    break;
-////                }
-//            }
+
         }
         }
 
@@ -291,23 +275,15 @@ boolean lock = false;
 
     @Auth(user = "1000")
     @PostMapping("/setTask")
-    public AjaxResult setTask(@RequestBody TaskData taskData ){
+    public AjaxResult setTask(@RequestBody TaskData taskData ) throws InterruptedException {
         //参数校验
         if ( taskData.number ==null || taskData.number.equals(0)||taskData.number<0){
             return AjaxResult.fail(404,"设备数出错");
         }
-
+        log.info(taskData.toString());
         taskData.setCreatIntegral(0L);
 
         taskData.setNumberStatic(taskData.getNumber());
-
-//        if (taskData.time ==null || taskData.time.isEmpty()){
-//            return AjaxResult.fail(404,"请输入时间");
-//        }
-
-//        if (taskData.duration ==null || taskData.duration.isEmpty()){
-//            return AjaxResult.fail(404,"请输入时长");
-//        }
 
        Long duration= DateUtil.between( DateUtil.parse(taskData.beginTimeFrom),DateUtil.parse(taskData.beginTimeTo), DateUnit.MINUTE);
         if (duration<10){
@@ -358,30 +334,75 @@ boolean lock = false;
             taskData.setRoomId(roomId);
             taskData.setVideoName(videoName);
         }
+//        if (taskData.getPersonAddress() !=null && !taskData.getPersonAddress().isEmpty()){
+//            //解析直播间roomId
+//            String sec_uid =xiguaAddress.getsecuidBypersonAddress(taskData.getPersonAddress());
+//            String roomId = xiguaAddress.getRoomIdByPersonAddress(sec_uid);
+//            if (roomId == null){
+//                return AjaxResult.fail(404,"地址解析错误");
+//            }
+//            //获取直播人名
+//            String videoName = xiguaAddress.getNickNameByPersonAddress(sec_uid);
+//            if (videoName == null){
+//                return AjaxResult.fail(404,"直播人地址解析错误");
+//            }
+//            taskData.setRoomId(roomId);
+//            taskData.setVideoName(videoName);
+//
+//            String xiguaName = xiguaAddress.getXiGuaName(roomId);
+//
+//            if (xiguaName == null){
+//                xiguaName = xiguaAddress.getXiGuaName(roomId);
+//            }
+//            if (xiguaName != null){
+//                taskData.setVideoName(xiguaName);
+//                taskData.setVideoNameXiGua(xiguaName);
+//            }
+//        }
+
+
+
         if (taskData.getPersonAddress() !=null && !taskData.getPersonAddress().isEmpty()){
-            //解析直播间roomId
-            String roomId = xiguaAddress.getRoomIdByPersonAddress(taskData.getPersonAddress());
+            String sec_uid =xiguaAddress.getsecuidBypersonAddress(taskData.getPersonAddress());
+            String roomId = xiguaAddress.getRoomIdByPersonAddress(sec_uid);
             if (roomId == null){
-                return AjaxResult.fail(404,"地址解析错误");
+        return AjaxResult.fail(404,"地址解析错误");
             }
-            //获取直播人名
-            String videoName = xiguaAddress.getNickNameByPersonAddress(taskData.getPersonAddress());
-            if (videoName == null){
-                return AjaxResult.fail(404,"直播人地址解析错误");
-            }
-            taskData.setRoomId(roomId);
-            taskData.setVideoName(videoName);
+AtomicReference<String> videoName = new AtomicReference<>();
+int taskCount = 2;
+CountDownLatch latch = new CountDownLatch(taskCount);
 
-            String xiguaName = xiguaAddress.getXiGuaName(roomId);
-            if (xiguaName == null){
-                xiguaName = xiguaAddress.getXiGuaName(roomId);
-            }
-            if (xiguaName != null){
-                taskData.setVideoName(xiguaName);
-                taskData.setVideoNameXiGua(xiguaName);
-            }
+Thread task1 = new Thread(() -> {
+    System.out.println("任务 1 开始");
+    //获取直播人名
+    videoName.set(xiguaAddress.getNickNameByPersonAddress(sec_uid));
+    System.out.println("任务 1 完成");
+    latch.countDown();
+});
+AtomicReference<String> xiguaName = new AtomicReference<>();
+Thread task2 = new Thread(() -> {
+    System.out.println("任务 2 开始");
+    xiguaName.set(xiguaAddress.getXiGuaName(roomId));
+    System.out.println("任务 2 完成");
+    latch.countDown();
+});
+            task1.start();
+            task2.start();
+// 等待所有任务完成
+            latch.await();
 
-
+            if (videoName.get() == null){
+        return AjaxResult.fail(404,"直播人地址解析错误");
+            }
+                    taskData.setRoomId(roomId);
+            taskData.setVideoName(videoName.get());
+        if (xiguaName.get() == null){
+        xiguaName.set(xiguaAddress.getXiGuaName(roomId));
+        }
+        if (xiguaName.get() != null){
+        taskData.setVideoName(xiguaName.get());
+        taskData.setVideoNameXiGua(xiguaName.get());
+        }
         }
 
         if (StrUtil.isEmptyIfStr(taskData.getRoomId()) || StrUtil.isEmptyIfStr(taskData.getVideoName()) || !NumberUtil.isNumber(taskData.getRoomId())){
@@ -491,6 +512,9 @@ boolean lock = false;
         return  AjaxResult.fail(404,"没有找到任务");
     }
 
+
+    //容错表
+    Map<String, Integer> checkMap = new HashMap<>();
     //脚本状态链接
     @PostMapping("/checkState")
     public AjaxResult checkState(@RequestBody CheckInfo checkInfo,@PathParam("mid") String mid){
@@ -499,17 +523,40 @@ boolean lock = false;
         //一般 参数 账号、设备唯一标识、设备昵称、直播间id、任务状态（在任务直播间或不在）、当前时间、md5校验
         String md5 = SecureUtil.md5(checkInfo.getCardNo()+checkInfo.getDeviceId()+checkInfo.getRoomId()+checkInfo.getTime()+checkInfo.getVideoDieOut()+checkInfo.getTaskState()+checkInfo.getId()+"sb1314520sbNB$");
         if (!md5.equals(mid)){return  AjaxResult.fail(-1,"?????你在做什么,唱歌");}
-        if (!StrUtil.isEmptyIfStr(checkInfo.getVideoDieOut())&&checkInfo.getVideoDieOut().equals("true")){//脚本发现直播间任务结束
-            for (int i = 0; i < taskDataList.size(); i++) {
-                if (taskDataList.get(i).getId().equals(checkInfo.getId())){ //找到任务直播间 删除他
-                    log.info("find the end room checkState deleteTaskById:{}", checkInfo);
-                    taskModel.deleteTaskById(checkInfo.getId());
-                    break;
-                }
-            }
-            return AjaxResult.fail(400,"任务失效");
-        }
         Long systemTime = System.currentTimeMillis();
+        if (!StrUtil.isEmptyIfStr(checkInfo.getVideoDieOut())&&checkInfo.getVideoDieOut().equals("true")){//脚本发现直播间任务结束
+            checkMap.merge(checkInfo.getId(), 1, Integer::sum);
+            if (checkMap.get(checkInfo.getId())>10){
+                for (int i = 0; i < taskDataList.size(); i++) {
+                    if (taskDataList.get(i).getId().equals(checkInfo.getId())){//找到任务直播间 删除他
+                        Integer num = (int) (taskDataList.get(i).getNumberStatic()* 0.4);
+                        if (checkMap.get(checkInfo.getId())>num){
+                            log.info("find the end room checkState deleteTaskById:{}", checkInfo);
+                            //直播结束剩余时间 大于20分钟
+                            if ( (Long.parseLong(taskDataList.get(i).getTime()) - systemTime)/60000 > 30){
+                                //加入 预定列表
+                                TaskData taskData = new TaskData();
+                                taskData.setBeginTimeFrom(DateUtil.format(DateUtil.offset(DateUtil.date(), DateField.MINUTE, 4),"yyyy-MM-dd HH:mm:ss"));
+                                taskData.setBeginTimeTo(taskDataList.get(i).getBeginTimeTo());
+                                long duration = DateUtil.between( DateUtil.parse(taskData.getBeginTimeFrom()),DateUtil.parse(taskData.beginTimeTo), DateUnit.MINUTE);
+                                taskData.setDuration(Long.toString(duration));
+                                taskData.setNumber(taskDataList.get(i).getNumberStatic());
+                                taskData.setNumberStatic(taskDataList.get(i).getNumberStatic());
+                                taskData.setTime(taskDataList.get(i).getTime());
+                                taskData.setPersonAddress(taskDataList.get(i).getPersonAddress());
+                                taskData.setIntegral(taskDataList.get(i).getIntegral());
+                                taskMapper.addTempTask(taskData);
+                            }
+                            taskModel.deleteTaskById(taskDataList.get(i).getId());
+                            checkMap.remove(taskDataList.get(i).getId());
+                            break;
+                        }
+                    }
+                }
+                return AjaxResult.fail(400,"任务失效");
+            }
+        }
+
         //当脚本领取任务后还未进入直播间
         if (!checkInfo.getTaskState().equals("true")){
             // 任务有效 在任务中 但是还没进入直播间 //刷新设备在线状态

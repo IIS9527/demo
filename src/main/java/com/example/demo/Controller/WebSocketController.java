@@ -70,3 +70,49 @@ package com.example.demo.Controller;
 //        System.out.println("发生错误！");
 //    }
 //}
+
+
+//import java.util.concurrent.CountDownLatch;
+//import java.util.concurrent.atomic.AtomicReference;if (taskData.getPersonAddress() !=null && !taskData.getPersonAddress().isEmpty()){
+////解析直播间roomId
+//String sec_uid =xiguaAddress.getsecuidBypersonAddress(taskData.getPersonAddress());
+//String roomId = xiguaAddress.getRoomIdByPersonAddress(sec_uid);
+//            if (roomId == null){
+//        return AjaxResult.fail(404,"地址解析错误");
+//            }
+//AtomicReference<String> videoName = new AtomicReference<>();
+//int taskCount = 2;
+//CountDownLatch latch = new CountDownLatch(taskCount);
+//
+//Thread task1 = new Thread(() -> {
+//    System.out.println("任务 1 开始");
+//    //获取直播人名
+//    videoName.set(xiguaAddress.getNickNameByPersonAddress(sec_uid));
+//    System.out.println("任务 1 完成");
+//    latch.countDown();
+//});
+//AtomicReference<String> xiguaName = new AtomicReference<>();
+//Thread task2 = new Thread(() -> {
+//    System.out.println("任务 2 开始");
+//    xiguaName.set(xiguaAddress.getXiGuaName(roomId));
+//    System.out.println("任务 2 完成");
+//    latch.countDown();
+//});
+//            task1.start();
+//            task2.start();
+//// 等待所有任务完成
+//            latch.await();
+//
+//            if (videoName.get() == null){
+//        return AjaxResult.fail(404,"直播人地址解析错误");
+//            }
+//                    taskData.setRoomId(roomId);
+//            taskData.setVideoName(videoName.get());
+//        if (xiguaName.get() == null){
+//        xiguaName.set(xiguaAddress.getXiGuaName(roomId));
+//        }
+//        if (xiguaName.get() != null){
+//        taskData.setVideoName(xiguaName.get());
+//        taskData.setVideoNameXiGua(xiguaName.get());
+//        }
+//        }

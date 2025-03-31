@@ -33,7 +33,7 @@ public class TaskData {
 
     public  Integer  numberStatic;  //总数量
 
-    public  Integer  numberWorking;  //总数量
+    public  Integer  numberWorking;  //工作数量
 
     public  String beginTimeFrom;
 
