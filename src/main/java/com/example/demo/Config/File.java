@@ -7,15 +7,25 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Component
+@Service
 public class File {
 
     @Value("${file.uploadUrlQR}")
@@ -24,12 +34,6 @@ public class File {
     private String  fileUrlEC;
     @Value("${file.uploadUrlScreenImg}")
     private String  fileUrlScreenImg;
-
-
-
-
-
-
 
     public String addEC(MultipartFile file) throws Exception{
         InetAddress localHost = InetAddress.getLocalHost();
@@ -129,5 +133,42 @@ public class File {
 
 //         return "true";
         return "/screen/"+roomId+videoName+"/"+ fileUUID;
+    }
+
+    @Async("fileTaskExecutor")  // 指定线程池
+    public CompletableFuture<String> adddeviceScreenImgAsync(MultipartFile file,
+                                                             String roomId,
+                                                             String videoName,
+                                                             String deviceId) {
+        try {
+            // 保留原文件处理逻辑
+            String originalFilename = file.getOriginalFilename();
+            String type = FileUtil.extName(originalFilename);
+            videoName = videoName.replaceAll("[\\s\\\\/:*?\"<>|]", "");
+
+            String uuid = IdUtil.fastSimpleUUID();
+            String fileUUID = deviceId + "kkkkkk" + uuid + StrUtil.DOT + type;
+
+            Path targetPath = Paths.get(fileUrlScreenImg, roomId, videoName, fileUUID);
+            Files.createDirectories(targetPath.getParent());
+
+            // 使用NIO异步写入
+            try (InputStream is = file.getInputStream();
+                 FileChannel channel = FileChannel.open(targetPath,
+                         StandardOpenOption.CREATE,
+                         StandardOpenOption.WRITE)) {
+
+                ByteBuffer buffer = ByteBuffer.allocateDirect(8192);  // 直接内存
+                while (is.read(buffer.array()) > 0) {
+                    buffer.flip();
+                    channel.write(buffer);
+                    buffer.clear();
+                }
+            }
+
+            return CompletableFuture.completedFuture("/screen/"+roomId+videoName+"/"+ fileUUID);
+        } catch (Exception e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
 }

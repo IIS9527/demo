@@ -75,6 +75,10 @@ public class DynamicScheduleTask  {
                     //roomId在任务列表中  即任务还未截止 脚本掉线
                     if (!StrUtil.isEmptyIfStr(deviceDataListGlobe.get(i).getId()) && deviceDataListGlobe.get(i).getId().equals(taskDataList.get(j).getId())){
                         // 记录数据
+                        if (deviceDataListGlobe.get(i).getRoomId() == null){
+                            log.error("task timeout delete error deviceDataListGlobe:{} ",deviceDataListGlobe.get(i));
+                            deviceDataListGlobe.get(i).setRoomId("0");
+                        }
                         taskMapper.insertDeviceDataOnce(deviceDataListGlobe.get(i));
                     // 清除设备任务 设置roomId为0
                         deviceDataListGlobe.get(i).setRoomId("0");

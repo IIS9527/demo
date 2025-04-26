@@ -205,7 +205,7 @@ public class AdminController {
             Long  todayTotalIntegral = 0L;
 
         for (int i = 0; i < deviceDataListGlobe.size(); i++) {
-            if (deviceDataListGlobe.get(i).getState()+1000*30 > currentTime && deviceDataListGlobe.get(i).getState().equals(deviceDataListGlobe.get(i).getLastWorkingState() ) ){
+            if (deviceDataListGlobe.get(i).getId()!=null  && !deviceDataListGlobe.get(i).getId().equals("0") && deviceDataListGlobe.get(i).getState()+1000*30 > currentTime && deviceDataListGlobe.get(i).getState().equals(deviceDataListGlobe.get(i).getLastWorkingState() ) ){
                 workingDevices++;
             }
             else if (deviceDataListGlobe.get(i).getState()+1000*60 > currentTime){
@@ -362,6 +362,13 @@ public class AdminController {
         return AjaxResult.success(integralModel.getOneDayTotalIntegral(searchDate));
     }
 
+
+
+    @Auth(user = "1000")
+    @GetMapping("/getAllDevices")
+    public AjaxResult getAllDevices(){
+        return AjaxResult.success(deviceDataListGlobe);
+    }
 
 
 }

@@ -427,7 +427,10 @@ Thread task2 = new Thread(() -> {
         for (int i = 0; i < taskDataList.size(); i++) {
             taskDataList.get(i).setNumberWorking(0);
             for (int j = 0; j < deviceDataList.size(); j++) {
-               if (taskDataList.get(i).getId().equals(deviceDataList.get(j).getId()) && deviceDataList.get(j).getState() != null && deviceDataList.get(j).getLastWorkingState() != null && time- deviceDataList.get(j).getState()<1000*130 && time - deviceDataList.get(j).getLastWorkingState() <1000*30  ){
+               if (taskDataList.get(i).getId().equals(deviceDataList.get(j).getId()) && deviceDataList.get(j).getState() != null
+                       && deviceDataList.get(j).getLastWorkingState() != null
+                       && time- deviceDataList.get(j).getState()<1000*30
+                       &&  deviceDataList.get(j).getState().equals(deviceDataList.get(j).getLastWorkingState())){
                    taskDataList.get(i).setNumberWorking(taskDataList.get(i).getNumberWorking()+1);
                }
             }
@@ -547,8 +550,8 @@ Thread task2 = new Thread(() -> {
                                 taskData.setIntegral(taskDataList.get(i).getIntegral());
                                 taskMapper.addTempTask(taskData);
                             }
-                            taskModel.deleteTaskById(taskDataList.get(i).getId());
-                            checkMap.remove(taskDataList.get(i).getId());
+                            taskModel.deleteTaskById(checkInfo.getId());
+                            checkMap.remove(checkInfo.getId());
                             break;
                         }
                     }
@@ -591,6 +594,7 @@ Thread task2 = new Thread(() -> {
                 deviceDataList.get(i).setLastWorkingState(systemTime);
                 deviceDataList.get(i).setState(systemTime);
                 deviceDataList.get(i).setDuration(0L);
+                break;
             }
             else if (deviceDataList.get(i).getDeviceId().equals(checkInfo.deviceId)&& deviceDataList.get(i).getStartWorkingState() != null) {
                 // 有效时间段请求
@@ -657,7 +661,7 @@ Thread task2 = new Thread(() -> {
             return  AjaxResult.fail(-1,"?????文件改了");
         }
 
-          int state = 0;
+        int state = 0;
         for (int i = 0; i < taskDataList.size(); i++) {
             if (taskDataList.get(i).getRoomId().equals(roomId) && taskDataList.get(i).getVideoName().equals(videoName)){
                 state=1;
