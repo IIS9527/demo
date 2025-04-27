@@ -87,7 +87,7 @@ public class DynamicScheduleTask  {
                     // 收回任务设备数
                         taskDataList.get(j).setNumber(taskDataList.get(j).getNumber()+1);
 //                        log.info("记录设备数{}",taskDataList.get(j).getNumber());
-                         continue;
+                         break;
                     }
                 }
             }

@@ -6,6 +6,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -16,7 +17,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,7 +27,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+@Slf4j
 @Service
 public class File {
 
@@ -98,42 +101,92 @@ public class File {
     }
 
 
-    public String adddeviceScreenImg(MultipartFile file, String roomId,String videoName,String deviceId) {
+//    public String adddeviceScreenImg(MultipartFile file, String roomId,String videoName,String deviceId) {
+//
+//        String originalFilename = file.getOriginalFilename(); //获取文件名
+//
+//        String type = FileUtil.extName(originalFilename);//
+//
+//        Pattern pattern = Pattern.compile("[\\s\\\\/:\\*\\?\\\"<>\\|]");
+//        Matcher matcher = pattern.matcher(videoName);
+//        videoName= matcher.replaceAll("");
+//
+//
+//        long size = file.getSize();//大小
+//
+//        String uuid = IdUtil.fastSimpleUUID();
+//
+//        String fileUUID = deviceId+"kkkkkk"+uuid + StrUtil.DOT + type; //41b1076684904f9cb4a503fb028db94b.jpg
+//
+//
+//        java.io.File uploadFile = new java.io.File(fileUrlScreenImg +roomId+videoName+"/"+ fileUUID);
+//
+//        //先存储到磁盘
+//        if (!uploadFile.getParentFile().exists()) {
+//            uploadFile.getParentFile().mkdirs();
+//        }
+//        try {
+//            file.transferTo(uploadFile);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        //获取文件的md5
+//        //使用m5 避免重复上传相同的文件
+////        String  md5 = SecureUtil.md5(uploadFile);
+//
+////         return "true";
+//        return "/screen/"+roomId+videoName+"/"+ fileUUID;
+//    }
 
-        String originalFilename = file.getOriginalFilename(); //获取文件名
-
-        String type = FileUtil.extName(originalFilename);//
-
-        Pattern pattern = Pattern.compile("[\\s\\\\/:\\*\\?\\\"<>\\|]");
-        Matcher matcher = pattern.matcher(videoName);
-        videoName= matcher.replaceAll("");
 
 
-        long size = file.getSize();//大小
-
-        String uuid = IdUtil.fastSimpleUUID();
-
-        String fileUUID = deviceId+"kkkkkk"+uuid + StrUtil.DOT + type; //41b1076684904f9cb4a503fb028db94b.jpg
-
-
-        java.io.File uploadFile = new java.io.File(fileUrlScreenImg +roomId+videoName+"/"+ fileUUID);
-
-        //先存储到磁盘
-        if (!uploadFile.getParentFile().exists()) {
-            uploadFile.getParentFile().mkdirs();
+    public String adddeviceScreenImg(MultipartFile file, String roomId, String videoName, String deviceId) {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("上传文件不能为空");
         }
+        if (StrUtil.isBlank(roomId) || StrUtil.isBlank(videoName) || StrUtil.isBlank(deviceId)) {
+            throw new IllegalArgumentException("roomId、videoName、deviceId不能为空");
+        }
+
         try {
-            file.transferTo(uploadFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //获取文件的md5
-        //使用m5 避免重复上传相同的文件
-//        String  md5 = SecureUtil.md5(uploadFile);
+            // 1. 清理 videoName（去掉非法字符）
+            String safeVideoName = videoName.replaceAll("[\\\\/:*?\"<>|\\s]", "");
 
-//         return "true";
-        return "/screen/"+roomId+videoName+"/"+ fileUUID;
+            // 2. 获取文件后缀名（例如 jpg）
+            String originalFilename = file.getOriginalFilename();
+            String fileExt = FileUtil.extName(originalFilename);
+
+            // 3. 生成唯一文件名
+            String uuid = IdUtil.fastSimpleUUID();
+            String newFileName = deviceId + "kkkkkk" + uuid + "." + fileExt;
+
+            // 4. 构建存储路径
+            Path uploadPath = Paths.get(fileUrlScreenImg, roomId + safeVideoName, newFileName);
+
+            // 5. 创建父目录
+            Files.createDirectories(uploadPath.getParent());
+
+            // 6. 使用 NIO 快速保存文件
+            try (ReadableByteChannel inputChannel = Channels.newChannel(file.getInputStream());
+                 FileChannel outputChannel = FileChannel.open(uploadPath,
+                         StandardOpenOption.CREATE,
+                         StandardOpenOption.WRITE,
+                         StandardOpenOption.TRUNCATE_EXISTING)) {
+
+                outputChannel.transferFrom(inputChannel, 0, file.getSize());
+            }
+            // 7. 返回对外访问的路径
+            return "/screen/" + roomId + safeVideoName + "/" + newFileName;
+
+        } catch (IOException e) {
+            log.error("保存文件失败", e);
+            throw new RuntimeException("文件保存失败", e);
+        }
     }
+
+
+
+
 
     @Async("fileTaskExecutor")  // 指定线程池
     public CompletableFuture<String> adddeviceScreenImgAsync(MultipartFile file,

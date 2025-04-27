@@ -418,21 +418,13 @@ public class XiguaAddress {
 //        FirefoxOptions firefoxOptions =new FirefoxOptions();
         // 设置允许弹框
         options.addArguments("disable-infobars","disable-web-security");
-//        options.addArguments("--window-size=500,1000");
-//        options.addArguments("--auto-open-devtools-for-tabs");
-//        firefoxOptions.addArguments("disable-infobars","disable-web-security");
+
 
         // 设置无gui 开发时还是不要加，可以看到浏览器效果
         options.addArguments("--headless");
-//        firefoxOptions.addArguments("--headless");
-//        options.addArguments("--no-sandbox");
-//        firefoxOptions.addArguments("--no-sandbox");
-//        options.addArguments('--disable-gpu');
-//        options.addArguments('--disable-dev-shm-usage');
 
-//        String driverPath =  "C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\Application\\chromedriver.exe";
-//        String driverPath =  "/usr/bin/chromedriver";
-//        String driverPath =  "C:\\Program Files\\Google\\Chrome\\Application\\chromedriver.exe";
+
+
         String driverPath =  "C:\\Program Files\\Google\\Chrome\\Application\\chromedriver.exe";
 
 
@@ -440,25 +432,9 @@ public class XiguaAddress {
 
         HashMap<String,String>  mobileEmulation = new HashMap<String,String>();
         mobileEmulation.put("deviceName","iPhone XR");
-//
-////        mobileEmulation.put("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36");
-////        mobileEmulation.put("sec-ch-ua-mobile","?0");
-////        mobileEmulation.put("sec-ch-ua","Not(A:Brand\";v=\"99\", \"Google Chrome\";v=\"133\", \"Chromium\";v=\"133");
-//
         options.setExperimentalOption("mobileEmulation", mobileEmulation);
 //        firefoxOptions.addArguments("-moz-mobile");
 
-
-//        Map<String, Object> deviceMetrics = new HashMap<>();
-//        deviceMetrics.put("width", 375);       // 设备宽度（像素）
-//        deviceMetrics.put("height", 812);      // 设备高度
-//        deviceMetrics.put("pixelRatio", 3.0);  // 像素密度（如 iPhone X 为 3.0）
-//        deviceMetrics.put("touch", true);           // 启用触摸事件模拟
-//        deviceMetrics.put("enableViewport", true);  // 启用视口约束
-//        Map<String, Object> mobileEmulation = new HashMap<>();
-//        mobileEmulation.put("deviceMetrics", deviceMetrics);
-//        mobileEmulation.put("userAgent", "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1");
-//        options.setExperimentalOption("mobileEmulation", mobileEmulation);
 
 
 
@@ -466,7 +442,7 @@ public class XiguaAddress {
 
         driver.get("https://webcast-open.douyin.com/open/webcast/reflow/?webcast_app_id=247160&room_id="+roomid);
 
-        new WebDriverWait(driver, Duration.ofMinutes(1)).until(ExpectedConditions.presenceOfElementLocated(By.className("saas-reflow-room-anchor-name")));
+        new WebDriverWait(driver, Duration.ofSeconds(30)).until(ExpectedConditions.presenceOfElementLocated(By.className("saas-reflow-room-anchor-name")));
 
         String   xiguaName =  driver.findElement(By.className("saas-reflow-room-anchor-name")).getAttribute("textContent");
 
