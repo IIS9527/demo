@@ -1,21 +1,18 @@
 package com.example.demo.Controller;
 
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.collection.ListUtil;
+
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.net.Ipv4Util;
+
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
-import cn.hutool.extra.servlet.ServletUtil;
-import cn.hutool.http.HttpUtil;
-import cn.hutool.log.Log;
+
 import com.example.demo.Address.XiguaAddress;
 import com.example.demo.Config.AjaxResult;
-import com.example.demo.Config.ApplicationVariable;
+
 import com.example.demo.Config.Auth;
 import com.example.demo.Config.File;
 import com.example.demo.Data.*;
@@ -27,7 +24,7 @@ import com.example.demo.common.IpUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.websocket.server.PathParam;
-import lombok.Synchronized;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,10 +34,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicInteger;
+
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
