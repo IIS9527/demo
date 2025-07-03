@@ -103,31 +103,53 @@ public class LitemallController {
             return AjaxResult.fail(405,"请输入任务每分钟积分");
         }
 
-
-        if (taskData.getPersonAddress() !=null && !taskData.getPersonAddress().isEmpty()){
+        if (taskData.getRoomAddress() !=null && !taskData.getRoomAddress().isEmpty()){
+            //解析直播间主页
+            String pageSource = xiguaAddress.getPageSource(taskData.roomAddress);
+            if (pageSource == null || !pageSource.contains("fromshareroomid")){
+                return AjaxResult.fail(409,"直播结束或出错");
+            }
             //解析直播间roomId
-            String sec_uid = xiguaAddress.getsecuidBypersonAddress(taskData.getPersonAddress());
-            String roomId = xiguaAddress.getRoomIdByPersonAddress(sec_uid);
-            if (roomId == null){
-                return AjaxResult.fail(406,"地址解析错误");
+            String roomId = xiguaAddress.getRoomIdByBrowser(pageSource);
+            if (roomId == null || roomId.isBlank() ){
+                return AjaxResult.fail(404,"地址解析错误");
             }
             //获取直播人名
-            String videoName = xiguaAddress.getNickNameByPersonAddress(sec_uid);
-            if (videoName == null){
-                return AjaxResult.fail(407,"直播人地址解析错误");
+            String videoName = xiguaAddress.getVideoNameByBrowser(pageSource);
+            if (videoName == null || videoName.isBlank() ){
+                return AjaxResult.fail(404,"直播人地址解析错误");
             }
+            String xiguaName  = xiguaAddress.getXiGuaName(roomId);
+            if (xiguaName == null || xiguaName.isEmpty() || xiguaName.isBlank()){
+                return AjaxResult.fail(404,"xg地址解析错误");
+            }
+            taskData.setVideoNameXiGua(xiguaName);
             taskData.setRoomId(roomId);
-            taskData.setVideoName(videoName);
+            taskData.setVideoName(xiguaName);
+        }
+        else{
+            if (taskData.getPersonAddress() !=null && !taskData.getPersonAddress().isEmpty()){
+                //解析直播间roomId
+                String sec_uid = xiguaAddress.getsecuidBypersonAddress(taskData.getPersonAddress());
+                String roomId = xiguaAddress.getRoomIdByPersonAddress(sec_uid);
 
-            String xiguaName = xiguaAddress.getXiGuaName(roomId);
-            if (xiguaName == null){
-                xiguaName = xiguaAddress.getXiGuaName(roomId);
-            }
-            if (xiguaName != null){
-                taskData.setVideoName(xiguaName);
-                taskData.setVideoNameXiGua(xiguaName);
-            }
+                if (roomId == null ||  roomId.isEmpty() || roomId.isBlank()){
+                    return AjaxResult.fail(404,"地址解析错误");
+                }
+                taskData.setRoomId(roomId);
 
+                String xiguaName = xiguaAddress.getXiGuaName(roomId);
+                if (xiguaName == null){
+                    xiguaName = xiguaAddress.getXiGuaName(roomId);
+                }
+                if (xiguaName != null){
+                    taskData.setVideoName(xiguaName);
+                    taskData.setVideoNameXiGua(xiguaName);
+                }
+                if (xiguaName == null){
+                    return AjaxResult.fail(404,"名字解析错误");
+                }
+            }
         }
 
         if (StrUtil.isEmptyIfStr(taskData.getRoomId()) || StrUtil.isEmptyIfStr(taskData.getVideoName()) || !NumberUtil.isNumber(taskData.getRoomId())){
@@ -242,7 +264,11 @@ public class LitemallController {
 
 
 
-
+//    @GetMapping("/getRoomIdBy")
+//    public String getRoomId(@PathParam("address") String address){
+//        System.out.println("sssss");
+//        return  xiguaAddress.getRoomIdByBrowser(address);
+//    }
 
 
 

@@ -15,6 +15,9 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.*;
 import com.gargoylesoftware.htmlunit.javascript.DefaultJavaScriptErrorListener;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.micrometer.common.util.StringUtils;
 import jakarta.websocket.server.PathParam;
 import lombok.extern.slf4j.Slf4j;
@@ -22,12 +25,10 @@ import lombok.val;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-import org.openqa.selenium.By;
-import org.openqa.selenium.PageLoadStrategy;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.devtools.DevTools;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -47,6 +48,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
@@ -66,6 +69,7 @@ import org.jsoup.nodes.Element;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -77,8 +81,24 @@ public class XiguaAddress {
     @Autowired
     public  DouyinRoomInfo douyinRoomInfo;
 
+    String driverPath =  "C:\\Program Files\\Google\\Chrome\\Application\\chromedriver.exe";
 
-    String IP = "http://110.40.201.109:8998";
+    String IP = "http://123.207.35.183:8998";
+
+    // 轮询索引（线程安全）
+    private static final AtomicInteger currentIndex = new AtomicInteger(0);
+
+    ChromeOptions options =new ChromeOptions();
+
+    ChromeDriver driver=  null;
+
+
+    public static JsonArray getIpAndPortList() throws IOException {
+        String filePath = "D:/jiaoben/config/jiexi.txt"; // 修改为你的文件路径
+        // 读取JSON文件内容
+        String jsonContent = new String(Files.readAllBytes(Paths.get(filePath)));
+        return new JsonParser().parse(jsonContent).getAsJsonObject().get("jiexiIp").getAsJsonArray();
+    }
     public String getRoomId( String address){
         try  {
 
@@ -118,6 +138,107 @@ public class XiguaAddress {
         }
 
     }
+
+    public  XiguaAddress(){
+        System.setProperty("webdriver.chrome.driver", driverPath);
+        //        FirefoxOptions firefoxOptions =new FirefoxOptions();
+        // 设置允许弹框
+        options.addArguments("disable-infobars","disable-web-security");
+
+        // 设置无gui 开发时还是不要加，可以看到浏览器效果
+//        options.addArguments("--headless");
+        HashMap<String,String>  mobileEmulation = new HashMap<String,String>();
+        mobileEmulation.put("deviceName","iPhone XR");
+        options.setExperimentalOption("mobileEmulation", mobileEmulation);
+
+// 1. 设置页面加载策略为 EAGER（不等待图片加载）
+        options.setPageLoadStrategy(PageLoadStrategy.EAGER);
+
+        // 2. 禁用图片加载（可选）
+        Map<String, Object> prefs = new HashMap<>();
+        prefs.put("profile.managed_default_content_settings.images", 2); // 2 = 禁止加载图片
+        options.setExperimentalOption("prefs", prefs);
+
+        // 3. 添加其他优化参数（可选）
+        options.addArguments("--disable-extensions");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+
+        driver = new ChromeDriver(options);
+//        firefoxOptions.addArguments("-moz-mobile");
+
+
+    }
+
+
+    public String getRoomIdByBrowser( String pageSource){
+
+        try {
+
+//            System.out.println(pageSource);
+            String[] findRoomidStr1 = pageSource.split("roomIdStr\\\\\":\\\\\"");
+//            log.info("findRoomidStr1{}",findRoomidStr1);
+            if (findRoomidStr1.length>1){
+//                System.out.println("sssssssssssssssssssssssss"+findRoomidStr1[1]);
+//                System.out.println(findRoomidStr1[1].split("\\\\")[0]);
+                if ( findRoomidStr1[1].split("\\\\")[0] != null &&!"0".equals(findRoomidStr1[1].split("\\\\")[0]) && NumberUtil.isNumber(findRoomidStr1[1].split("\\\\")[0])){
+                    return     findRoomidStr1[1].split("\\\\")[0];
+                }
+            }
+            return null;
+
+
+//            System.out.println(element.getAttribute("innerHTML"));
+//            SearchContext searchContext = driver.findElement(By.tagName("script")).findElement(By.xpath("/html/body/script[22]"));
+//            List<WebElement> webElements = driver.findElements();
+//
+//            for (int i = 0; i < webElements.size(); i++) {
+//                System.out.println( webElements.get(i).getAttribute("innerHTML"));
+//            }
+
+
+//            log.info("xiguaName find is :{}", roomId);
+//            driver.close();
+        }
+        catch (Exception e) {
+            log.error("getXiGuaName Exception:{}",e.toString());
+            return null;
+        }
+
+
+    }
+    public  String getPageSource(String address){
+        try {
+            driver.get(address);
+            return driver.getPageSource();
+        }
+        catch (Exception e) {
+            log.error("getXiGuaName Exception:{}",e.toString());
+            return null;
+        }
+    }
+    public String getVideoNameByBrowser(String pageSource){
+
+        String[] findRoomidStr1 = pageSource.split("\"nickname\\\\\":\\\\\"");
+        if (findRoomidStr1.length>1){
+//            System.out.println("sssssssssssssssssssssssss"+findRoomidStr1[1]);
+            String videoName = findRoomidStr1[1].split("\\\\")[0];
+
+            if ( videoName != null || !videoName.isEmpty() || !videoName.isBlank()){
+                return     videoName;
+            }
+        }
+        return null;
+
+    }
+
+
+
+
+
+
+
 
 //    }
     public String getVideoName( String address){
@@ -159,6 +280,7 @@ public class XiguaAddress {
         }
     }
 
+
     public HtmlPage getTimeByHtmlUnit(String url) throws IOException {
 
         if (StringUtils.isBlank(url)) {
@@ -166,6 +288,16 @@ public class XiguaAddress {
         }
 
         WebClient webClient = new WebClient(BrowserVersion.CHROME);
+
+                    // 手机版 User-Agent（示例为 iPhone）
+        webClient.addRequestHeader("User-Agent",
+                            "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1");
+
+                    // 模拟移动端常用设置
+        webClient.addRequestHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+        webClient.addRequestHeader("Accept-Language", "zh-CN,zh;q=0.9");
+        webClient.addRequestHeader("X-Requested-With", "XMLHttpRequest"); // 部分站点需要
+
         webClient.getOptions().setJavaScriptEnabled(true);
         webClient.getOptions().setCssEnabled(false);
         webClient.getOptions().setActiveXNative(false);
@@ -223,13 +355,23 @@ public class XiguaAddress {
     public String getRoomIdByPersonAddress(String sec_uid){
         Document document = null;
         try {
-            document = Jsoup.connect(IP+"/dy/getRoomIdByPersonAddress?sec_uid="+sec_uid).get();
-            return document.body().html();
+            JsonArray jsonArray = getIpAndPortList();
+            // 轮询获取下一个服务器索引
+            int index = currentIndex.getAndUpdate(i -> (i + 1) % jsonArray.size());
+
+            for (int i = 0; i < jsonArray.size(); i++) {
+                String IP = jsonArray.get(index).getAsString();
+                document = Jsoup.connect(IP+"/dy/getRoomIdByPersonAddress?sec_uid="+sec_uid).get();
+                if (document.body().html() != null && !document.body().html().isEmpty() && !document.body().html().isBlank()){
+                    return document.body().html();
+                }
+                index = index+1%jsonArray.size();
+            }
+            return null;
         } catch (IOException e) {
-            log.error("getPerson IOException:{}",e.toString());
+            log.error("getRoomId error {}",e.toString());
             return null;
         }
-
     }
 
 //    public  String getRoomIdByPersonAddress(String sec_uid){
@@ -307,11 +449,21 @@ public class XiguaAddress {
 
         Document document = null;
         try {
-            document = Jsoup.connect(IP+"/dy/getsecuid?personAddress="+personAddress).get();
-            return document.body().html();
+            JsonArray jsonArray = getIpAndPortList();
+            // 轮询获取下一个服务器索引
+            int index = currentIndex.getAndUpdate(i -> (i + 1) % jsonArray.size());
+            for (int i = 0; i < jsonArray.size(); i++) {
+                String IP = jsonArray.get(index).getAsString();
+                document = Jsoup.connect(IP+"/dy/getsecuid?personAddress="+personAddress).get();
+                if (document.body().html() != null && !document.body().html().isEmpty() && !document.body().html().isBlank()){
+                    return document.body().html();
+                }
+                index = index+1%jsonArray.size();
+            }
+            return null;
         } catch (IOException e) {
             log.error("getPerson IOException:{}",e.toString());
-        return null;
+            return null;
         }
     }
 
@@ -404,7 +556,17 @@ public class XiguaAddress {
     public String getNickNameByPersonAddress(String sec_uid){
         Document document = null;
         try {
-            document = Jsoup.connect(IP+"/dy/getnickNameBySec_uid?sec_uid="+sec_uid).get();
+            JsonArray jsonArray = getIpAndPortList();
+            // 轮询获取下一个服务器索引
+            int index = currentIndex.getAndUpdate(i -> (i + 1) % jsonArray.size());
+            for (int i = 0; i < jsonArray.size(); i++) {
+                String IP = jsonArray.get(index).getAsString();
+                document = Jsoup.connect(IP+"/dy/getnickNameBySec_uid?sec_uid="+sec_uid).get();
+                if (document.body().html() != null && !document.body().html().isEmpty() && !document.body().html().isBlank()){
+                    return document.body().html();
+                }
+                index = index+1%jsonArray.size();
+            }
             return document.body().html();
         } catch (IOException e) {
             log.error("getPerson IOException:{}",e.toString());
@@ -412,60 +574,26 @@ public class XiguaAddress {
         }
 
     }
+
+
     public String getXiGuaName(String roomid) {
-
-        ChromeOptions options =new ChromeOptions();
-//        FirefoxOptions firefoxOptions =new FirefoxOptions();
-        // 设置允许弹框
-        options.addArguments("disable-infobars","disable-web-security");
-
-
-        // 设置无gui 开发时还是不要加，可以看到浏览器效果
-        options.addArguments("--headless");
-
-
-
-        String driverPath =  "C:\\Program Files\\Google\\Chrome\\Application\\chromedriver.exe";
-
-
-        System.setProperty("webdriver.chrome.driver", driverPath);
-
-        HashMap<String,String>  mobileEmulation = new HashMap<String,String>();
-        mobileEmulation.put("deviceName","iPhone XR");
-        options.setExperimentalOption("mobileEmulation", mobileEmulation);
-//        firefoxOptions.addArguments("-moz-mobile");
-
-
-
-
-        ChromeDriver driver=  new ChromeDriver(options);
-
-        driver.get("https://webcast-open.douyin.com/open/webcast/reflow/?webcast_app_id=247160&room_id="+roomid);
-
-        new WebDriverWait(driver, Duration.ofSeconds(30)).until(ExpectedConditions.presenceOfElementLocated(By.className("saas-reflow-room-anchor-name")));
-
-        String   xiguaName =  driver.findElement(By.className("saas-reflow-room-anchor-name")).getAttribute("textContent");
-
-        log.info("xiguaName find is :{}", xiguaName);
-
-        driver.quit();
-
+        String   xiguaName =null;
         try {
-            // 批处理命令
-            String command = "cmd /c taskkill /IM chrome.exe /F >nul 2>&1";
+//            driver.switchTo().newWindow(WindowType.TAB);
+            driver.get("https://webcast-open.douyin.com/open/webcast/reflow/?webcast_app_id=247160&room_id="+roomid);
 
-            // 执行命令
-            Process process = Runtime.getRuntime().exec(command);
+            new WebDriverWait(driver, Duration.ofSeconds(20)).until(ExpectedConditions.presenceOfElementLocated(By.className("saas-reflow-room-anchor-name")));
 
-            // 等待命令执行完成
-            int exitCode = process.waitFor();
+            xiguaName =  driver.findElement(By.className("saas-reflow-room-anchor-name")).getAttribute("textContent");
 
-            // 输出命令执行结果
-            System.out.println("命令执行完成，退出码: " + exitCode);
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            log.error("xiguaName find is :{}", xiguaName);
+//            driver.close();
+            }
+        catch (Exception e) {
+            log.error("getXiGuaName Exception:{}",e.toString());
+//            driver.close();
+            return null;
         }
-
 
         return xiguaName;
 
@@ -512,14 +640,7 @@ public class XiguaAddress {
     }
 
 
-//    public String getXiGuaName(String roomId){
-//        String name = douyinRoomInfo.tryMethod1(roomId);
-//        if (name != null){
-//            return name;
-//        }else {
-//            return  douyinRoomInfo.tryMethod2(roomId);
-//        }
-//    }
+
 }
 
 

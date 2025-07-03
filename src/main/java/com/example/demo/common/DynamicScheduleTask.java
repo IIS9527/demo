@@ -135,22 +135,33 @@ public class DynamicScheduleTask  {
                 //判断roomid和直播名称
                 if (StrUtil.isEmptyIfStr(tempTaskDataList.get(i).getRoomId()) || StrUtil.isEmptyIfStr(tempTaskDataList.get(i).getVideoName())){
                     if (tempTaskDataList.get(i).getRoomAddress() !=null && !tempTaskDataList.get(i).getRoomAddress().isEmpty()){
-                        //解析直播间roomId
-                        String roomId = xiguaAddress.getRoomId(tempTaskDataList.get(i).roomAddress);
-                        if (roomId.equals("false")){
-                            log.error("roomId false");
+
+                        //解析直播间主页
+                        String pageSource = xiguaAddress.getPageSource(tempTaskDataList.get(i).roomAddress);
+                        if (pageSource ==null || !pageSource.contains("fromshareroomid")){
+                            if ((Long.parseLong(tempTaskDataList.get(i).getTime()) - currentTime)/60000 >30){
+                                tempTaskDataList.get(i).setBeginTimeFrom(DateUtil.format(DateUtil.offset(DateUtil.date(), DateField.MINUTE, 5),"yyyy-MM-dd HH:mm:ss"));
+                                tempTaskDataList.get(i).setDuration(Long.toString(DateUtil.between( DateUtil.parse(tempTaskDataList.get(i).getBeginTimeFrom()),DateUtil.parse(tempTaskDataList.get(i).beginTimeTo), DateUnit.MINUTE)));
+                                tempTaskDataList.get(i).setBeginTimeTo(tempTaskDataList.get(i).beginTimeTo);
+                                tempTaskDataList.get(i).setId(null);
+                                taskMapper.addTempTask(tempTaskDataList.get(i));
+                            }
                             continue;
                         }
-                        //获取直播人名
-                        String videoName = xiguaAddress.getVideoName(tempTaskDataList.get(i).roomAddress);
-                        if (videoName.equals("false")){
-                            log.error("videoName false");
+                        //解析直播间roomId
+                        String roomId = xiguaAddress.getRoomIdByBrowser(pageSource);
+                        if (roomId == null || roomId.isBlank() ){
                             continue;
                         }
                         tempTaskDataList.get(i).setRoomId(roomId);
-                        tempTaskDataList.get(i).setVideoName(videoName);
+                        String xiguaName  = xiguaAddress.getXiGuaName(roomId);
+                        if (xiguaName == null || xiguaName.isEmpty() || xiguaName.isBlank()){
+                            continue;
+                        }
+                        tempTaskDataList.get(i).setVideoName(xiguaName);
+                        tempTaskDataList.get(i).setVideoNameXiGua(xiguaName);
                     }
-                    if (tempTaskDataList.get(i).getPersonAddress() !=null && !tempTaskDataList.get(i).getPersonAddress().isEmpty()){
+                    else if (tempTaskDataList.get(i).getPersonAddress() !=null && !tempTaskDataList.get(i).getPersonAddress().isEmpty()){
                         //解析直播间roomId
                         String sec_uid = xiguaAddress.getsecuidBypersonAddress(tempTaskDataList.get(i).getPersonAddress());
                         String roomId = xiguaAddress.getRoomIdByPersonAddress(sec_uid);
@@ -167,18 +178,15 @@ public class DynamicScheduleTask  {
                             continue;
                         }
                         //获取直播人名
-                        String videoName = xiguaAddress.getNickNameByPersonAddress(sec_uid);
-                        if (videoName == null){
-                            log.error("videoName By person address false");
-                            continue;
-                        }
                         tempTaskDataList.get(i).setRoomId(roomId);
-                        tempTaskDataList.get(i).setVideoName(videoName);
                         String xiguaName = xiguaAddress.getXiGuaName(roomId);
                         if (xiguaName == null){xiguaName = xiguaAddress.getXiGuaName(roomId);}
                         if (xiguaName != null){
                             tempTaskDataList.get(i).setVideoName(xiguaName);
                             tempTaskDataList.get(i).setVideoNameXiGua(xiguaName);
+                        }
+                        if (xiguaName == null || xiguaName.isEmpty()){
+                            continue;
                         }
                     }
                 }

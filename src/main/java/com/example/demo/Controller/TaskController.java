@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
@@ -82,7 +83,7 @@ boolean lock = false;
               log.error(" error md5 find  check  !!!!!!!!!!");
               return  AjaxResult.fail(-1,"?????你在做什么,唱歌");
           }
-        if(!(timeNow+60000>=Long.parseLong(time)&&(timeNow-60000)<Long.parseLong(time))){
+        if(!(timeNow+70000>=Long.parseLong(time)&&(timeNow-70000)<Long.parseLong(time))){
             log.error("timeError：{}，{}",timeNow,time);
             return  AjaxResult.fail(-1,"?????你在做什么,唱歌");
         }
@@ -318,89 +319,79 @@ boolean lock = false;
         }
 
         if (taskData.getRoomAddress() !=null && !taskData.getRoomAddress().isEmpty()){
+
+            String pageSource = xiguaAddress.getPageSource(taskData.roomAddress);
+            if (pageSource == null || !pageSource.contains("fromshareroomid")){
+                return AjaxResult.fail(404,"直播结束或出错");
+            }
             //解析直播间roomId
-            String roomId = xiguaAddress.getRoomId(taskData.roomAddress);
-            if (roomId.equals("false")){
+            String roomId = xiguaAddress.getRoomIdByBrowser(pageSource);
+            if (roomId == null || roomId.isBlank() ){
                 return AjaxResult.fail(404,"地址解析错误");
             }
             //获取直播人名
-            String videoName = xiguaAddress.getVideoName(taskData.roomAddress);
-            if (videoName.equals("false")){
+            String videoName = xiguaAddress.getVideoNameByBrowser(pageSource);
+            if (videoName == null || videoName.isBlank() ){
                 return AjaxResult.fail(404,"直播人地址解析错误");
             }
+            String xiguaName  = xiguaAddress.getXiGuaName(roomId);
+            if (xiguaName == null || xiguaName.isEmpty() || xiguaName.isBlank()){
+                return AjaxResult.fail(404,"xg地址解析错误");
+            }
+            taskData.setVideoNameXiGua(xiguaName);
             taskData.setRoomId(roomId);
-            taskData.setVideoName(videoName);
+            taskData.setVideoName(xiguaName);
         }
-//        if (taskData.getPersonAddress() !=null && !taskData.getPersonAddress().isEmpty()){
-//            //解析直播间roomId
-//            String sec_uid =xiguaAddress.getsecuidBypersonAddress(taskData.getPersonAddress());
-//            String roomId = xiguaAddress.getRoomIdByPersonAddress(sec_uid);
-//            if (roomId == null){
-//                return AjaxResult.fail(404,"地址解析错误");
-//            }
-//            //获取直播人名
-//            String videoName = xiguaAddress.getNickNameByPersonAddress(sec_uid);
-//            if (videoName == null){
-//                return AjaxResult.fail(404,"直播人地址解析错误");
-//            }
-//            taskData.setRoomId(roomId);
-//            taskData.setVideoName(videoName);
-//
-//            String xiguaName = xiguaAddress.getXiGuaName(roomId);
-//
-//            if (xiguaName == null){
-//                xiguaName = xiguaAddress.getXiGuaName(roomId);
-//            }
-//            if (xiguaName != null){
-//                taskData.setVideoName(xiguaName);
-//                taskData.setVideoNameXiGua(xiguaName);
-//            }
-//        }
 
+        AtomicReference<String> videoName = new AtomicReference<>();
+        AtomicReference<String> xiguaName = new AtomicReference<>();
 
+            if (taskData.getPersonAddress() !=null && !taskData.getPersonAddress().isEmpty()){
+                String sec_uid =xiguaAddress.getsecuidBypersonAddress(taskData.getPersonAddress());
+                String roomId = xiguaAddress.getRoomIdByPersonAddress(sec_uid);
+                if (roomId == null || roomId.isEmpty() || roomId.isBlank()){
+                    return AjaxResult.fail(404,"地址解析错误");
+                }
+//                int taskCount = 2;
+//                CountDownLatch latch = new CountDownLatch(taskCount);
 
-        if (taskData.getPersonAddress() !=null && !taskData.getPersonAddress().isEmpty()){
-            String sec_uid =xiguaAddress.getsecuidBypersonAddress(taskData.getPersonAddress());
-            String roomId = xiguaAddress.getRoomIdByPersonAddress(sec_uid);
-            if (roomId == null){
-        return AjaxResult.fail(404,"地址解析错误");
+//                Thread task1 = new Thread(() -> {
+//                    System.out.println("任务 1 开始");
+//                    //获取直播人名
+//                    videoName.set(xiguaAddress.getNickNameByPersonAddress(sec_uid));
+//                    System.out.println("任务 1 完成");
+//                    latch.countDown();
+//                });
+
+//                Thread task2 = new Thread(() -> {
+//                    System.out.println("任务 2 开始");
+//                    xiguaName.set(xiguaAddress.getXiGuaName(roomId));
+//                    System.out.println("任务 2 完成");
+//                    latch.countDown();
+//                });
+//                task1.start();
+//                task2.start();
+                // 等待所有任务完成
+//                latch.await(20, TimeUnit.SECONDS);
+
+//                if (videoName.get() == null){
+//                    return AjaxResult.fail(404,"直播人地址解析错误");
+//                }
+                taskData.setRoomId(roomId);
+//                taskData.setVideoName(videoName.get());
+                xiguaName.set(xiguaAddress.getXiGuaName(roomId));
+
+                if (xiguaName.get() != null){
+                    taskData.setVideoName(xiguaName.get());
+                    taskData.setVideoNameXiGua(xiguaName.get());
+
+                }
+                if (xiguaName.get() == null){
+                    return AjaxResult.fail(404,"名字解析错误");
+                }
             }
-AtomicReference<String> videoName = new AtomicReference<>();
-int taskCount = 2;
-CountDownLatch latch = new CountDownLatch(taskCount);
 
-Thread task1 = new Thread(() -> {
-    System.out.println("任务 1 开始");
-    //获取直播人名
-    videoName.set(xiguaAddress.getNickNameByPersonAddress(sec_uid));
-    System.out.println("任务 1 完成");
-    latch.countDown();
-});
-AtomicReference<String> xiguaName = new AtomicReference<>();
-Thread task2 = new Thread(() -> {
-    System.out.println("任务 2 开始");
-    xiguaName.set(xiguaAddress.getXiGuaName(roomId));
-    System.out.println("任务 2 完成");
-    latch.countDown();
-});
-            task1.start();
-            task2.start();
-// 等待所有任务完成
-            latch.await();
 
-            if (videoName.get() == null){
-        return AjaxResult.fail(404,"直播人地址解析错误");
-            }
-                    taskData.setRoomId(roomId);
-            taskData.setVideoName(videoName.get());
-        if (xiguaName.get() == null){
-        xiguaName.set(xiguaAddress.getXiGuaName(roomId));
-        }
-        if (xiguaName.get() != null){
-        taskData.setVideoName(xiguaName.get());
-        taskData.setVideoNameXiGua(xiguaName.get());
-        }
-        }
 
         if (StrUtil.isEmptyIfStr(taskData.getRoomId()) || StrUtil.isEmptyIfStr(taskData.getVideoName()) || !NumberUtil.isNumber(taskData.getRoomId())){
             return AjaxResult.fail(404,"RoomId 出错");
@@ -544,6 +535,7 @@ Thread task2 = new Thread(() -> {
                                 taskData.setNumberStatic(taskDataList.get(i).getNumberStatic());
                                 taskData.setTime(taskDataList.get(i).getTime());
                                 taskData.setPersonAddress(taskDataList.get(i).getPersonAddress());
+                                taskData.setRoomAddress(taskDataList.get(i).getRoomAddress());
                                 taskData.setIntegral(taskDataList.get(i).getIntegral());
                                 taskMapper.addTempTask(taskData);
                             }
@@ -639,12 +631,16 @@ Thread task2 = new Thread(() -> {
     @Value("${server.port}")
     String  port;
     @PostMapping("/screenUpload")
-    public AjaxResult qrUpload(@RequestParam(value = "file") MultipartFile multipartFile,@PathParam("roomId") String roomId,
-                               @PathParam("videoName") String videoName ,@PathParam("deviceId") String deviceId,
-                               @PathParam("time") String time ,@PathParam("mid1") String mid1 ,@PathParam("mid2") String mid2) throws IOException {
+    public AjaxResult qrUpload(@RequestParam(value = "file") MultipartFile multipartFile, @PathParam("roomId") String roomId,
+                               @PathParam("videoName") String videoName , @PathParam("deviceId") String deviceId,
+                               @PathParam("time") String time , @PathParam("mid1") String mid1 , @PathParam("mid2") String mid2,
+                               HttpServletRequest request) throws IOException {
 
 //        上传文件 校验  ？？
-
+        // 1. 检查请求是否超时
+        if (request.isAsyncStarted()) {
+            return AjaxResult.fail(404,"请求超时");
+        }
         String md5 = SecureUtil.md5(roomId+videoName+deviceId+mid1+time+"sb1314520sbNB$");
 
         log.info(multipartFile.toString());
