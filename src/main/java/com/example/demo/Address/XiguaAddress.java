@@ -357,7 +357,7 @@ public class XiguaAddress {
         try {
             JsonArray jsonArray = getIpAndPortList();
             // 轮询获取下一个服务器索引
-            int index = currentIndex.getAndUpdate(i -> (i + 1) % jsonArray.size());
+            int index = currentIndex.getAndUpdate(i -> i % jsonArray.size());
 
             for (int i = 0; i < jsonArray.size(); i++) {
                 String IP = jsonArray.get(index).getAsString();
@@ -365,7 +365,7 @@ public class XiguaAddress {
                 if (document.body().html() != null && !document.body().html().isEmpty() && !document.body().html().isBlank()){
                     return document.body().html();
                 }
-                index = index+1%jsonArray.size();
+                index = (index+1)%jsonArray.size();
             }
             return null;
         } catch (IOException e) {
@@ -458,7 +458,7 @@ public class XiguaAddress {
                 if (document.body().html() != null && !document.body().html().isEmpty() && !document.body().html().isBlank()){
                     return document.body().html();
                 }
-                index = index+1%jsonArray.size();
+                index = (index+1)%jsonArray.size();
             }
             return null;
         } catch (IOException e) {
@@ -565,7 +565,7 @@ public class XiguaAddress {
                 if (document.body().html() != null && !document.body().html().isEmpty() && !document.body().html().isBlank()){
                     return document.body().html();
                 }
-                index = index+1%jsonArray.size();
+                index = (index+1)%jsonArray.size();
             }
             return document.body().html();
         } catch (IOException e) {

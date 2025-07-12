@@ -105,7 +105,7 @@ public class LitemallController {
 
         if (taskData.getRoomAddress() !=null && !taskData.getRoomAddress().isEmpty()){
             //解析直播间主页
-            String pageSource = xiguaAddress.getPageSource(taskData.roomAddress);
+            String pageSource = xiguaAddress.getPageSource(taskData.getRoomAddress());
             if (pageSource == null || !pageSource.contains("fromshareroomid")){
                 return AjaxResult.fail(409,"直播结束或出错");
             }

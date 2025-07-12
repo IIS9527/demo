@@ -137,7 +137,7 @@ public class DynamicScheduleTask  {
                     if (tempTaskDataList.get(i).getRoomAddress() !=null && !tempTaskDataList.get(i).getRoomAddress().isEmpty()){
 
                         //解析直播间主页
-                        String pageSource = xiguaAddress.getPageSource(tempTaskDataList.get(i).roomAddress);
+                        String pageSource = xiguaAddress.getPageSource(tempTaskDataList.get(i).getRoomAddress());
                         if (pageSource ==null || !pageSource.contains("fromshareroomid")){
                             if ((Long.parseLong(tempTaskDataList.get(i).getTime()) - currentTime)/60000 >30){
                                 tempTaskDataList.get(i).setBeginTimeFrom(DateUtil.format(DateUtil.offset(DateUtil.date(), DateField.MINUTE, 5),"yyyy-MM-dd HH:mm:ss"));

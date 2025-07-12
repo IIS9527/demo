@@ -320,7 +320,7 @@ boolean lock = false;
 
         if (taskData.getRoomAddress() !=null && !taskData.getRoomAddress().isEmpty()){
 
-            String pageSource = xiguaAddress.getPageSource(taskData.roomAddress);
+            String pageSource = xiguaAddress.getPageSource(taskData.getRoomAddress());
             if (pageSource == null || !pageSource.contains("fromshareroomid")){
                 return AjaxResult.fail(404,"直播结束或出错");
             }

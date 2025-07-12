@@ -11,7 +11,7 @@ public class TaskData {
 
     public  String  sid;
 
-    public  String  roomAddress;
+    private   String  roomAddress;
 
     public  String  time; //截止时间戳
 
