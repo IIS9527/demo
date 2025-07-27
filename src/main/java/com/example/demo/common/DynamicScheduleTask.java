@@ -156,6 +156,12 @@ public class DynamicScheduleTask  {
                         tempTaskDataList.get(i).setRoomId(roomId);
                         String xiguaName  = xiguaAddress.getXiGuaName(roomId);
                         if (xiguaName == null || xiguaName.isEmpty() || xiguaName.isBlank()){
+                            tempTaskDataList.get(i).setBeginTimeFrom(DateUtil.format(DateUtil.offset(DateUtil.date(), DateField.MINUTE, 5),"yyyy-MM-dd HH:mm:ss"));
+                            tempTaskDataList.get(i).setDuration(Long.toString(DateUtil.between( DateUtil.parse(tempTaskDataList.get(i).getBeginTimeFrom()),DateUtil.parse(tempTaskDataList.get(i).beginTimeTo), DateUnit.MINUTE)));
+                            tempTaskDataList.get(i).setBeginTimeTo(tempTaskDataList.get(i).beginTimeTo);
+                            tempTaskDataList.get(i).setId(null);
+                            tempTaskDataList.get(i).setRoomId(null);
+                            taskMapper.addTempTask(tempTaskDataList.get(i));
                             continue;
                         }
                         tempTaskDataList.get(i).setVideoName(xiguaName);
@@ -186,6 +192,12 @@ public class DynamicScheduleTask  {
                             tempTaskDataList.get(i).setVideoNameXiGua(xiguaName);
                         }
                         if (xiguaName == null || xiguaName.isEmpty()){
+                            tempTaskDataList.get(i).setBeginTimeFrom(DateUtil.format(DateUtil.offset(DateUtil.date(), DateField.MINUTE, 5),"yyyy-MM-dd HH:mm:ss"));
+                            tempTaskDataList.get(i).setDuration(Long.toString(DateUtil.between( DateUtil.parse(tempTaskDataList.get(i).getBeginTimeFrom()),DateUtil.parse(tempTaskDataList.get(i).beginTimeTo), DateUnit.MINUTE)));
+                            tempTaskDataList.get(i).setBeginTimeTo(tempTaskDataList.get(i).beginTimeTo);
+                            tempTaskDataList.get(i).setId(null);
+                            tempTaskDataList.get(i).setRoomId(null);
+                            taskMapper.addTempTask(tempTaskDataList.get(i));
                             continue;
                         }
                     }

@@ -155,9 +155,9 @@ public class XiguaAddress {
         options.setPageLoadStrategy(PageLoadStrategy.EAGER);
 
         // 2. 禁用图片加载（可选）
-        Map<String, Object> prefs = new HashMap<>();
-        prefs.put("profile.managed_default_content_settings.images", 2); // 2 = 禁止加载图片
-        options.setExperimentalOption("prefs", prefs);
+//        Map<String, Object> prefs = new HashMap<>();
+//        prefs.put("profile.managed_default_content_settings.images", 2); // 2 = 禁止加载图片
+//        options.setExperimentalOption("prefs", prefs);
 
         // 3. 添加其他优化参数（可选）
         options.addArguments("--disable-extensions");
