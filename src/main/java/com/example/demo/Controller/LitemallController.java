@@ -136,6 +136,12 @@ public class LitemallController {
                 if (roomId == null ||  roomId.isEmpty() || roomId.isBlank()){
                     return AjaxResult.fail(404,"地址解析错误");
                 }
+
+                String yellowish = xiguaAddress.getYellowish(roomId);
+                if (yellowish == null || yellowish.isEmpty() || yellowish.isBlank() || "true".equals(yellowish)){
+                    return AjaxResult.fail(404,"禁止小黄车");
+                }
+
                 taskData.setRoomId(roomId);
 
                 String xiguaName = xiguaAddress.getXiGuaName(roomId);

@@ -99,6 +99,13 @@ public class XiguaAddress {
         String jsonContent = new String(Files.readAllBytes(Paths.get(filePath)));
         return new JsonParser().parse(jsonContent).getAsJsonObject().get("jiexiIp").getAsJsonArray();
     }
+
+    public static JsonArray getIpAndPortListYellowish() throws IOException {
+        String filePath = "D:/jiaoben/config/jiexi.txt"; // 修改为你的文件路径
+        // 读取JSON文件内容
+        String jsonContent = new String(Files.readAllBytes(Paths.get(filePath)));
+        return new JsonParser().parse(jsonContent).getAsJsonObject().get("yellowish").getAsJsonArray();
+    }
     public String getRoomId( String address){
         try  {
 
@@ -357,7 +364,7 @@ public class XiguaAddress {
         try {
             JsonArray jsonArray = getIpAndPortList();
             // 轮询获取下一个服务器索引
-            int index = currentIndex.getAndUpdate(i -> i % jsonArray.size());
+            int index = currentIndex.updateAndGet(i -> i % jsonArray.size());
 
             for (int i = 0; i < jsonArray.size(); i++) {
                 String IP = jsonArray.get(index).getAsString();
@@ -373,6 +380,32 @@ public class XiguaAddress {
             return null;
         }
     }
+
+    public String getYellowish(String roomId){
+        Document document = null;
+        try {
+            JsonArray jsonArray = getIpAndPortListYellowish();
+            // 轮询获取下一个服务器索引
+            int index = currentIndex.get() % jsonArray.size();
+            for (int i = 0; i < jsonArray.size(); i++) {
+                String IP = jsonArray.get(index).getAsString();
+                document = Jsoup.connect(IP+"/dy/yellowish?roomId="+roomId).get();
+                if (document.body().html() != null && !document.body().html().isEmpty() && !document.body().html().isBlank()){
+                    return document.body().html();
+                }
+                index = (index+1)%jsonArray.size();
+            }
+            return null;
+        } catch (IOException e) {
+            log.error("getRoomId error {}",e.toString());
+            return null;
+        }
+    }
+
+
+
+
+
 
 //    public  String getRoomIdByPersonAddress(String sec_uid){
 //
@@ -451,7 +484,7 @@ public class XiguaAddress {
         try {
             JsonArray jsonArray = getIpAndPortList();
             // 轮询获取下一个服务器索引
-            int index = currentIndex.getAndUpdate(i -> (i + 1) % jsonArray.size());
+            int index = currentIndex.updateAndGet(i -> (i + 1) % jsonArray.size());
             for (int i = 0; i < jsonArray.size(); i++) {
                 String IP = jsonArray.get(index).getAsString();
                 document = Jsoup.connect(IP+"/dy/getsecuid?personAddress="+personAddress).get();

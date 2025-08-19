@@ -352,6 +352,12 @@ boolean lock = false;
                 if (roomId == null || roomId.isEmpty() || roomId.isBlank()){
                     return AjaxResult.fail(404,"地址解析错误");
                 }
+
+                String yellowish = xiguaAddress.getYellowish(roomId);
+                if (yellowish == null || yellowish.isEmpty() || yellowish.isBlank() || "true".equals(yellowish)){
+                    return AjaxResult.fail(404,"禁止小黄车");
+                }
+
 //                int taskCount = 2;
 //                CountDownLatch latch = new CountDownLatch(taskCount);
 
